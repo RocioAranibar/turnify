@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 export default async function AppointmentsPage() {
@@ -36,23 +37,33 @@ export default async function AppointmentsPage() {
         <div className="mt-8 overflow-hidden rounded-2xl border border-zinc-800">
           <table className="w-full text-left">
             <thead className="bg-zinc-900">
-              <tr>
+             <tr>
                 <th className="px-4 py-4">Cliente</th>
                 <th className="px-4 py-4">Email</th>
                 <th className="px-4 py-4">Fecha</th>
                 <th className="px-4 py-4">Hora</th>
                 <th className="px-4 py-4">Estado</th>
-              </tr>
+                <th className="px-4 py-4">Acciones</th>
+            </tr>
             </thead>
 
             <tbody>
               {appointments?.map((appointment) => (
                 <tr key={appointment.id} className="border-t border-zinc-800">
-                  <td className="px-4 py-4">{appointment.client_name}</td>
-                  <td className="px-4 py-4">{appointment.client_email}</td>
-                  <td className="px-4 py-4">{appointment.appointment_date}</td>
-                  <td className="px-4 py-4">{appointment.appointment_time}</td>
-                  <td className="px-4 py-4">{appointment.status}</td>
+                    <td className="px-4 py-4">{appointment.client_name}</td>
+                    <td className="px-4 py-4">{appointment.client_email}</td>
+                    <td className="px-4 py-4">{appointment.appointment_date}</td>
+                    <td className="px-4 py-4">{appointment.appointment_time}</td>
+                    <td className="px-4 py-4">{appointment.status}</td>
+
+                    <td className="px-4 py-4">
+                        <Link
+                        href={`/appointments/${appointment.id}`}
+                        className="rounded-lg bg-zinc-800 px-3 py-2 text-sm hover:bg-zinc-700"
+                        >
+                        Ver
+                        </Link>
+                    </td>
                 </tr>
               ))}
             </tbody>
