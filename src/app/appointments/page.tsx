@@ -1,28 +1,19 @@
-const appointments = [
-  {
-    id: 1,
-    client: "Ana Gómez",
-    date: "2026-07-01",
-    time: "09:30",
-    status: "Confirmado",
-  },
-  {
-    id: 2,
-    client: "Juan Pérez",
-    date: "2026-07-01",
-    time: "11:00",
-    status: "Pendiente",
-  },
-  {
-    id: 3,
-    client: "Lucía Torres",
-    date: "2026-07-02",
-    time: "15:30",
-    status: "Cancelado",
-  },
-];
+import { supabase } from "@/lib/supabase";
 
-export default function AppointmentsPage() {
+export default async function AppointmentsPage() {
+  const { data: appointments, error } = await supabase
+    .from("appointments")
+    .select("*")
+    .order("appointment_date", { ascending: true });
+
+  if (error) {
+    return (
+      <main className="min-h-screen bg-zinc-950 px-6 py-8 text-white">
+        <p>Error al cargar turnos: {error.message}</p>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-zinc-950 px-6 py-8 text-white">
       <div className="mx-auto max-w-6xl">
@@ -47,6 +38,7 @@ export default function AppointmentsPage() {
             <thead className="bg-zinc-900">
               <tr>
                 <th className="px-4 py-4">Cliente</th>
+                <th className="px-4 py-4">Email</th>
                 <th className="px-4 py-4">Fecha</th>
                 <th className="px-4 py-4">Hora</th>
                 <th className="px-4 py-4">Estado</th>
@@ -54,14 +46,12 @@ export default function AppointmentsPage() {
             </thead>
 
             <tbody>
-              {appointments.map((appointment) => (
-                <tr
-                  key={appointment.id}
-                  className="border-t border-zinc-800"
-                >
-                  <td className="px-4 py-4">{appointment.client}</td>
-                  <td className="px-4 py-4">{appointment.date}</td>
-                  <td className="px-4 py-4">{appointment.time}</td>
+              {appointments?.map((appointment) => (
+                <tr key={appointment.id} className="border-t border-zinc-800">
+                  <td className="px-4 py-4">{appointment.client_name}</td>
+                  <td className="px-4 py-4">{appointment.client_email}</td>
+                  <td className="px-4 py-4">{appointment.appointment_date}</td>
+                  <td className="px-4 py-4">{appointment.appointment_time}</td>
                   <td className="px-4 py-4">{appointment.status}</td>
                 </tr>
               ))}
