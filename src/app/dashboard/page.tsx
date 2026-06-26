@@ -22,9 +22,19 @@ export default async function DashboardPage() {
   const cancelled =
     appointments?.filter((a) => a.status === "cancelled").length ?? 0;
 
-  const nextAppointment = appointments?.find(
-    (a) => a.status !== "cancelled"
-  );
+  const nextAppointment = appointments
+    ?.filter((appointment) => appointment.status === "confirmed")
+    .sort((a, b) => {
+      const dateA = new Date(
+        `${a.appointment_date}T${a.appointment_time}`
+      ).getTime();
+
+      const dateB = new Date(
+        `${b.appointment_date}T${b.appointment_time}`
+      ).getTime();
+
+      return dateA - dateB;
+    })[0];
 
   const stats = [
     { label: "Total de turnos", value: total },
@@ -93,7 +103,7 @@ return (
         </div>
       ) : (
         <p className="mt-4 text-zinc-400">
-          No hay turnos próximos disponibles.
+          No hay turnos confirmados.
         </p>
       )}
     </section>
