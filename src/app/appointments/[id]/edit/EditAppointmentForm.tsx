@@ -47,9 +47,6 @@ export default function EditAppointmentForm({
     .eq("id", appointment.id)
     .select();
 
-    console.log("UPDATE DATA:", data);
-    console.log("UPDATE ERROR:", error);
-
     if (error) {
     setMessage(`Error al actualizar: ${error.message}`);
     setLoading(false);

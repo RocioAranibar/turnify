@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-
+import Link from "next/link";
 export default function NewAppointmentPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -43,6 +43,9 @@ export default function NewAppointmentPage() {
   return (
     <main className="min-h-screen bg-zinc-950 px-6 py-8 text-white">
       <div className="mx-auto max-w-3xl">
+        <Link href="/appointments" className="text-blue-400 hover:text-blue-300">
+          ← Volver a turnos
+        </Link>
         <h1 className="text-3xl font-bold">Nuevo turno</h1>
         <p className="mt-2 text-zinc-400">
           Registrá un nuevo turno para un cliente.

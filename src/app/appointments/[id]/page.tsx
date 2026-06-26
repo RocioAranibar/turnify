@@ -1,5 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import CancelAppointmentButton from "./CancelAppointmentButton";
+import AppointmentActions from "./AppointmentActions";
 
 type AppointmentDetailPageProps = {
   params: Promise<{
@@ -43,22 +45,40 @@ export default async function AppointmentDetailPage({
         </Link>
 
         <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div>
-                <h1 className="text-3xl font-bold">Detalle del turno</h1>
-                <p className="mt-2 text-zinc-400">
+              <h1 className="text-3xl font-bold">Detalle del turno</h1>
+              <p className="mt-2 text-zinc-400">
                 Información completa del turno seleccionado.
-                </p>
+              </p>
             </div>
 
-            <Link
-                href={`/appointments/${appointment.id}/edit`}
-                className="rounded-xl bg-blue-600 px-4 py-2 font-semibold hover:bg-blue-500"
-            >
-                Editar
-            </Link>
-            </div>
+           <div className="flex gap-3">
+            {appointment.status !== "completed" && (
+              <>
+                <AppointmentActions
+                  appointmentId={appointment.id}
+                  status={appointment.status}
+                />
 
+                <Link
+                  href={`/appointments/${appointment.id}/edit`}
+                  className="rounded-xl bg-blue-600 px-4 py-2 font-semibold hover:bg-blue-500"
+                >
+                  Editar
+                </Link>
+
+                <CancelAppointmentButton appointmentId={appointment.id} />
+              </>
+            )}
+
+            {appointment.status === "completed" && (
+              <div className="rounded-xl border border-green-700 bg-green-500/10 px-4 py-2 text-green-400">
+                 Realizado.
+              </div>
+            )}
+          </div>
+        </div>
           <div className="mt-8 space-y-4">
             <div>
               <p className="text-sm text-zinc-500">Cliente</p>

@@ -1,85 +1,102 @@
-const stats = [
-  { label: "Turnos de hoy", value: "8" },
-  { label: "Pendientes", value: "3" },
-  { label: "Confirmados", value: "5" },
-  { label: "Cancelados", value: "1" },
-];
+import { supabase } from "@/lib/supabase";
+import Link from "next/link";
+import AppLayout from "@/components/AppLayout";
+export default async function DashboardPage() {
+  const { data: appointments, error } = await supabase
+    .from("appointments")
+    .select("*")
+    .order("appointment_date", { ascending: true });
 
-const nextAppointments = [
-  { client: "Ana Gómez", date: "2026-07-01", time: "09:30", status: "Confirmado" },
-  { client: "Juan Pérez", date: "2026-07-01", time: "11:00", status: "Pendiente" },
-  { client: "Lucía Torres", date: "2026-07-02", time: "15:30", status: "Confirmado" },
-];
+  if (error) {
+    return (
+      <main className="min-h-screen bg-zinc-950 px-6 py-8 text-white">
+        <p>Error al cargar dashboard: {error.message}</p>
+      </main>
+    );
+  }
 
-export default function DashboardPage() {
-  return (
-    <main className="min-h-screen bg-zinc-950 px-6 py-8 text-white">
-      <section className="mx-auto max-w-6xl">
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+  const total = appointments?.length ?? 0;
+  const pending = appointments?.filter((a) => a.status === "pending").length ?? 0;
+  const confirmed =
+    appointments?.filter((a) => a.status === "confirmed").length ?? 0;
+  const cancelled =
+    appointments?.filter((a) => a.status === "cancelled").length ?? 0;
+
+  const nextAppointment = appointments?.find(
+    (a) => a.status !== "cancelled"
+  );
+
+  const stats = [
+    { label: "Total de turnos", value: total },
+    { label: "Pendientes", value: pending },
+    { label: "Confirmados", value: confirmed },
+    { label: "Cancelados", value: cancelled },
+  ];
+
+return (
+  <AppLayout>
+    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+      <div>
+        <p className="text-sm text-blue-400">Turnify</p>
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="mt-2 text-zinc-400">
+          Resumen real de los turnos registrados.
+        </p>
+      </div>
+
+      <Link
+        href="/appointments/new"
+        className="rounded-xl bg-blue-600 px-5 py-3 text-center font-semibold hover:bg-blue-500"
+      >
+        Nuevo turno
+      </Link>
+    </div>
+
+    <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {stats.map((item) => (
+        <article
+          key={item.label}
+          className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6"
+        >
+          <p className="text-sm text-zinc-400">{item.label}</p>
+          <p className="mt-3 text-4xl font-bold">{item.value}</p>
+        </article>
+      ))}
+    </div>
+
+    <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+      <h2 className="text-xl font-semibold">Próximo turno</h2>
+
+      {nextAppointment ? (
+        <div className="mt-6 flex flex-col justify-between gap-4 rounded-xl border border-zinc-800 bg-zinc-950 p-5 md:flex-row md:items-center">
           <div>
-            <p className="text-sm text-blue-400">Turnify</p>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="mt-2 text-zinc-400">
-              Resumen general de turnos y actividad reciente.
+            <p className="text-lg font-semibold">
+              {nextAppointment.client_name}
+            </p>
+
+            <p className="mt-1 text-zinc-400">
+              {nextAppointment.appointment_date} -{" "}
+              {nextAppointment.appointment_time}
+            </p>
+
+            <p className="mt-1 text-sm text-zinc-500">
+              {nextAppointment.notes || "Sin notas"}
             </p>
           </div>
 
-          <a
-            href="/appointments/new"
-            className="rounded-xl bg-blue-600 px-5 py-3 text-center font-semibold hover:bg-blue-500"
+          <Link
+            href={`/appointments/${nextAppointment.id}`}
+            className="rounded-xl bg-blue-600 px-4 py-2 text-center font-semibold hover:bg-blue-500"
           >
-            Nuevo turno
-          </a>
+            Ver detalle
+          </Link>
         </div>
-
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((item) => (
-            <article
-              key={item.label}
-              className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6"
-            >
-              <p className="text-sm text-zinc-400">{item.label}</p>
-              <p className="mt-3 text-4xl font-bold">{item.value}</p>
-            </article>
-          ))}
-        </div>
-
-        <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Próximos turnos</h2>
-            <a href="/appointments" className="text-sm text-blue-400 hover:text-blue-300">
-              Ver todos
-            </a>
-          </div>
-
-          <div className="mt-6 overflow-hidden rounded-xl border border-zinc-800">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-zinc-950 text-zinc-400">
-                <tr>
-                  <th className="px-4 py-3">Cliente</th>
-                  <th className="px-4 py-3">Fecha</th>
-                  <th className="px-4 py-3">Hora</th>
-                  <th className="px-4 py-3">Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {nextAppointments.map((appointment) => (
-                  <tr key={`${appointment.client}-${appointment.time}`} className="border-t border-zinc-800">
-                    <td className="px-4 py-3">{appointment.client}</td>
-                    <td className="px-4 py-3 text-zinc-300">{appointment.date}</td>
-                    <td className="px-4 py-3 text-zinc-300">{appointment.time}</td>
-                    <td className="px-4 py-3">
-                      <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs text-blue-300">
-                        {appointment.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </section>
-    </main>
-  );
+      ) : (
+        <p className="mt-4 text-zinc-400">
+          No hay turnos próximos disponibles.
+        </p>
+      )}
+    </section>
+  </AppLayout>
+);
 }
