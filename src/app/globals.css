@@ -24,3 +24,64 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+.fc {
+  color: white;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.fc .fc-button {
+  background: #18181b !important;
+  border: 1px solid #27272a !important;
+  border-radius: 0.75rem !important;
+  padding: 0.5rem 0.9rem !important;
+  text-transform: capitalize !important;
+}
+
+.fc .fc-button-primary:not(:disabled):hover {
+  background: #2563eb !important;
+}
+
+.fc .fc-button-primary:disabled {
+  background: #27272a !important;
+  opacity: 1 !important;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th,
+.fc-theme-standard .fc-scrollgrid {
+  border-color: #27272a !important;
+}
+
+.fc .fc-col-header-cell {
+  background: #09090b;
+  padding: 0.75rem 0;
+}
+
+.fc .fc-daygrid-day {
+  background: #09090b;
+}
+
+.fc .fc-daygrid-day-number {
+  color: #e4e4e7;
+  padding: 0.5rem;
+}
+
+.fc .fc-day-today {
+  background: #0f172a !important;
+}
+
+.fc .fc-event {
+  border: none !important;
+  border-radius: 0.5rem !important;
+  padding: 0.15rem 0.35rem !important;
+  font-size: 0.75rem !important;
+  cursor: pointer;
+}
+
+.fc .fc-daygrid-event {
+  margin-top: 0.25rem;
+}
