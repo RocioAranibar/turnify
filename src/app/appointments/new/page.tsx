@@ -1,8 +1,9 @@
 "use client";
-
+import { availableHours } from "@/lib/schedule";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+const today = new Date().toISOString().split("T")[0]; 
 export default function NewAppointmentPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -13,7 +14,6 @@ export default function NewAppointmentPage() {
     setMessage("");
 
     const formData = new FormData(event.currentTarget);
-
     const newAppointment = {
       client_name: formData.get("client_name") as string,
       client_email: formData.get("client_email") as string,
@@ -26,6 +26,12 @@ export default function NewAppointmentPage() {
     const { error } = await supabase
     .from("appointments")
     .insert(newAppointment);
+
+    if (newAppointment.appointment_date < today) {
+      setMessage("La fecha del turno no puede ser anterior a hoy.");
+      setLoading(false);
+      return;
+    }
 
     if (error) {
     setMessage(`Error al guardar: ${error.message}`);
@@ -86,18 +92,26 @@ export default function NewAppointmentPage() {
                 name="appointment_date"
                 type="date"
                 required
+                min={today}
                 className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
               />
             </div>
 
             <div>
               <label className="block text-sm text-zinc-300">Hora</label>
-              <input
+              <select
                 name="appointment_time"
-                type="time"
                 required
                 className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
-              />
+              >
+                <option value="">Seleccioná un horario</option>
+
+                {availableHours.map((hour) => (
+                  <option key={hour} value={hour}>
+                    {hour} hs
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

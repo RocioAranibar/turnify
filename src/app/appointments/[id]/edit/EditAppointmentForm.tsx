@@ -1,10 +1,10 @@
 "use client";
-
+import { availableHours } from "@/lib/schedule";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
+const today = new Date().toISOString().split("T")[0];
 type Appointment = {
   id: string;
   client_name: string;
@@ -110,24 +110,30 @@ export default function EditAppointmentForm({
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="block text-sm text-zinc-300">Fecha</label>
-              <input
-                name="appointment_date"
-                type="date"
-                required
-                defaultValue={appointment.appointment_date}
-                className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
-              />
+            <input
+              name="appointment_date"
+              type="date"
+              required
+              min={today}
+              defaultValue={appointment.appointment_date}
+              className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
+            />
             </div>
 
             <div>
               <label className="block text-sm text-zinc-300">Hora</label>
-              <input
+              <select
                 name="appointment_time"
-                type="time"
                 required
                 defaultValue={appointment.appointment_time.slice(0, 5)}
                 className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
-              />
+              >
+                {availableHours.map((hour) => (
+                  <option key={hour} value={hour}>
+                    {hour} hs
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
