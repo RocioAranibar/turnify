@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import AppLayout from "@/components/AppLayout";
 import CancelAppointmentButton from "./CancelAppointmentButton";
 import AppointmentActions from "./AppointmentActions";
 
@@ -8,6 +9,22 @@ type AppointmentDetailPageProps = {
     id: string;
   }>;
 };
+
+function getStatusLabel(status: string) {
+  if (status === "pending") return "Pendiente";
+  if (status === "confirmed") return "Confirmado";
+  if (status === "cancelled") return "Cancelado";
+  if (status === "completed") return "Realizado";
+  return status;
+}
+
+function getStatusClass(status: string) {
+  if (status === "pending") return "bg-yellow-500/20 text-yellow-400";
+  if (status === "confirmed") return "bg-green-500/20 text-green-400";
+  if (status === "cancelled") return "bg-red-500/20 text-red-400";
+  if (status === "completed") return "bg-sky-500/20 text-sky-400";
+  return "bg-zinc-500/20 text-zinc-400";
+}
 
 export default async function AppointmentDetailPage({
   params,
@@ -22,98 +39,96 @@ export default async function AppointmentDetailPage({
 
   if (error || !appointment) {
     return (
-      <main className="min-h-screen bg-zinc-950 px-6 py-8 text-white">
-        <div className="mx-auto max-w-3xl">
-          <Link href="/appointments" className="text-blue-400 hover:text-blue-300">
-            ← Volver a turnos
-          </Link>
+      <AppLayout>
+        <Link href="/appointments" className="text-blue-400 hover:text-blue-300">
+          ← Volver a la lista
+        </Link>
 
-          <h1 className="mt-6 text-3xl font-bold">Turno no encontrado</h1>
-          <p className="mt-2 text-zinc-400">
-            No pudimos encontrar el turno solicitado.
-          </p>
-        </div>
-      </main>
+        <h1 className="mt-6 text-3xl font-bold">Turno no encontrado</h1>
+        <p className="mt-2 text-zinc-400">
+          No pudimos encontrar el turno solicitado.
+        </p>
+      </AppLayout>
     );
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 px-6 py-8 text-white">
-      <div className="mx-auto max-w-3xl">
-        <Link href="/appointments" className="text-blue-400 hover:text-blue-300">
-          ← Volver a turnos
-        </Link>
+    <AppLayout>
+      <Link href="/appointments" className="text-blue-400 hover:text-blue-300">
+        ← Volver a la lista
+      </Link>
 
-        <section className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold">Detalle del turno</h1>
-              <p className="mt-2 text-zinc-400">
-                Información completa del turno seleccionado.
+      <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_240px]">
+        <section className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-8 shadow-lg">
+          <h1 className="text-2xl font-bold">Detalle del turno</h1>
+
+          <div className="mt-8 space-y-5">
+            <div className="grid gap-2 md:grid-cols-[120px_1fr]">
+              <p className="text-sm text-zinc-400">Cliente</p>
+              <p className="font-medium">{appointment.client_name}</p>
+            </div>
+
+            <div className="grid gap-2 md:grid-cols-[120px_1fr]">
+              <p className="text-sm text-zinc-400">Email</p>
+              <p className="font-medium">{appointment.client_email}</p>
+            </div>
+
+            <div className="grid gap-2 md:grid-cols-[120px_1fr]">
+              <p className="text-sm text-zinc-400">Fecha</p>
+              <p className="font-medium">{appointment.appointment_date}</p>
+            </div>
+
+            <div className="grid gap-2 md:grid-cols-[120px_1fr]">
+              <p className="text-sm text-zinc-400">Hora</p>
+              <p className="font-medium">
+                {appointment.appointment_time.slice(0, 5)}
               </p>
             </div>
 
-           <div className="flex gap-3">
-            {appointment.status !== "completed" && (
-              <>
-                <AppointmentActions
-                  appointmentId={appointment.id}
-                  status={appointment.status}
-                />
-
-                <Link
-                  href={`/appointments/${appointment.id}/edit`}
-                  className="rounded-xl bg-blue-600 px-4 py-2 font-semibold hover:bg-blue-500"
-                >
-                  Editar
-                </Link>
-
-                <CancelAppointmentButton appointmentId={appointment.id} />
-              </>
-            )}
-
-            {appointment.status === "completed" && (
-              <div className="rounded-xl border border-green-700 bg-green-500/10 px-4 py-2 text-green-400">
-                 Realizado.
-              </div>
-            )}
-          </div>
-        </div>
-          <div className="mt-8 space-y-4">
-            <div>
-              <p className="text-sm text-zinc-500">Cliente</p>
-              <p className="text-lg">{appointment.client_name}</p>
+            <div className="grid gap-2 md:grid-cols-[120px_1fr]">
+              <p className="text-sm text-zinc-400">Estado</p>
+              <span
+                className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${getStatusClass(
+                  appointment.status
+                )}`}
+              >
+                {getStatusLabel(appointment.status)}
+              </span>
             </div>
 
-            <div>
-              <p className="text-sm text-zinc-500">Email</p>
-              <p className="text-lg">{appointment.client_email}</p>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <p className="text-sm text-zinc-500">Fecha</p>
-                <p className="text-lg">{appointment.appointment_date}</p>
-              </div>
-
-              <div>
-                <p className="text-sm text-zinc-500">Hora</p>
-                <p className="text-lg">{appointment.appointment_time}</p>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-sm text-zinc-500">Estado</p>
-              <p className="text-lg">{appointment.status}</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-zinc-500">Notas</p>
-              <p className="text-lg">{appointment.notes || "Sin notas"}</p>
+            <div className="grid gap-2 md:grid-cols-[120px_1fr]">
+              <p className="text-sm text-zinc-400">Notas</p>
+              <p className="font-medium">
+                {appointment.notes || "Sin notas"}
+              </p>
             </div>
           </div>
         </section>
+
+        <aside className="flex flex-col gap-4">
+          {appointment.status !== "completed" ? (
+            <>
+              <AppointmentActions
+                appointmentId={appointment.id}
+                status={appointment.status}
+              />
+
+              <Link
+                href={`/appointments/${appointment.id}/edit`}
+                className="rounded-xl bg-blue-600 px-5 py-3 text-center font-semibold hover:bg-blue-500"
+              >
+                Editar turno
+              </Link>
+
+              <CancelAppointmentButton appointmentId={appointment.id} />
+            </>
+          ) : (
+            <div className="rounded-xl border border-sky-800 bg-sky-500/10 px-4 py-3 text-sm text-sky-300">
+              Este turno ya fue realizado.
+            </div>
+          )}
+        </aside>
       </div>
-    </main>
+    </AppLayout>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import AppLayout from "@/components/AppLayout";
 import { getBusyHoursByDate } from "@/lib/appointments";
 import { availableHours } from "@/lib/schedule";
 import { supabase } from "@/lib/supabase";
@@ -109,15 +110,11 @@ export default function NewAppointmentForm() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 px-6 py-8 text-white">
-      <div className="mx-auto max-w-3xl">
-        <Link href="/appointments" className="text-blue-400 hover:text-blue-300">
-          ← Volver a turnos
-        </Link>
-
+    <AppLayout>
+      <div className="max-w-3xl">
         <h1 className="mt-6 text-3xl font-bold">Nuevo turno</h1>
         <p className="mt-2 text-zinc-400">
-          Registrá un nuevo turno para un cliente.
+          Completá los datos para agendar un nuevo turno.
         </p>
 
         <form
@@ -229,6 +226,6 @@ export default function NewAppointmentForm() {
           {message && <p className="text-sm text-zinc-300">{message}</p>}
         </form>
       </div>
-    </main>
+    </AppLayout>
   );
 }
