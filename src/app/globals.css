@@ -85,3 +85,112 @@ body {
 .fc .fc-daygrid-event {
   margin-top: 0.25rem;
 }
+.fc {
+  color: #ffffff;
+}
+
+.fc .fc-toolbar {
+  margin-bottom: 1.5rem;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.fc .fc-button {
+  background: #18181b !important;
+  border: 1px solid #27272a !important;
+  border-radius: 0.75rem !important;
+  padding: 0.45rem 0.85rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  text-transform: capitalize !important;
+  box-shadow: none !important;
+}
+
+.fc .fc-button:hover {
+  background: #27272a !important;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.fc .fc-button-primary:disabled {
+  background: #27272a !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.fc-theme-standard .fc-scrollgrid,
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: #27272a !important;
+}
+
+.fc .fc-col-header-cell {
+  background: #111827;
+  padding: 0.75rem 0;
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: #e5e7eb;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.fc .fc-daygrid-day {
+  background: #0b1120;
+  height: 95px;
+}
+
+.fc .fc-daygrid-day-frame {
+  padding: 0.35rem;
+}
+
+.fc .fc-daygrid-day-number {
+  color: #e5e7eb;
+  text-decoration: none;
+  font-size: 0.875rem;
+  padding: 0.35rem;
+}
+
+.fc .fc-day-other .fc-daygrid-day-number {
+  color: #71717a;
+}
+
+.fc .fc-day-today {
+  background: #0f172a !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.fc .fc-event {
+  border: none !important;
+  border-radius: 0.45rem !important;
+  padding: 0.1rem 0.35rem !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+}
+
+.fc .fc-daygrid-event {
+  margin-top: 0.25rem;
+}
+
+.fc .turnify-event-confirmed {
+  background: #15803d !important;
+  color: #dcfce7 !important;
+}
+
+.fc .turnify-event-pending {
+  background: #ca8a04 !important;
+  color: #fef3c7 !important;
+}

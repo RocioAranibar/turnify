@@ -3,6 +3,9 @@
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 
+const emailRegex =
+  /^[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)?(gmail|outlook|hotmail|yahoo)\.com$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(com\.ar|com|org|net|edu|gov)$/i;
+
 export default function SettingsForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -25,6 +28,13 @@ export default function SettingsForm() {
 
   async function updateProfile() {
     setMessage("");
+
+    if (!email || !emailRegex.test(email)) {
+      setMessage(
+        "Ingresá un correo válido. Ej: usuario@gmail.com"
+      );
+      return;
+    }
 
     const { error } = await supabase.auth.updateUser({
       email,
@@ -84,6 +94,8 @@ export default function SettingsForm() {
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
+            pattern="^[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)?(gmail|outlook|hotmail|yahoo)\.com$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(com\.ar|com|org|net|edu|gov)$"
+            title="Ingresá un correo válido. Ej: usuario@gmail.com o usuario@empresa.com.ar"
             className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
           />
         </div>

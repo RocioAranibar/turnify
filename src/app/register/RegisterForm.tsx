@@ -4,7 +4,10 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function RegisterForm() {
+  const emailRegex =
+    /^[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)?(gmail|outlook|hotmail|yahoo)\.com$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(com\.ar|com|org|net|edu|gov)$/i;
+  
+    export default function RegisterForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -20,6 +23,12 @@ export default function RegisterForm() {
     const email = String(formData.get("email") ?? "");
     const password = String(formData.get("password") ?? "");
     const confirmPassword = String(formData.get("confirmPassword") ?? "");
+
+    if (!emailRegex.test(email)) {
+      setMessage("Ingresá un correo válido. Ej: usuario@gmail.com");
+      setLoading(false);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setMessage("Las contraseñas no coinciden.");
@@ -72,6 +81,8 @@ export default function RegisterForm() {
           type="email"
           required
           placeholder="tu@email.com"
+          pattern="^[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)?(gmail|outlook|hotmail|yahoo)\.com$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(com\.ar|com|org|net|edu|gov)$"
+          title="Ingresá un correo válido. Ej: usuario@gmail.com"
           className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
         />
       </div>

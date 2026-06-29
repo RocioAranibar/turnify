@@ -8,6 +8,18 @@ import Link from "next/link";
 import { useState } from "react";
 
 const today = getTodayLocal();
+const maxDate = getMaxDate();
+
+function getMaxDate() {
+  const date = new Date();
+  date.setMonth(date.getMonth() + 18);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
 
 function getTodayLocal() {
   const now = new Date();
@@ -65,8 +77,20 @@ export default function NewAppointmentForm() {
     const appointmentDate = String(formData.get("appointment_date") ?? "");
     const appointmentTime = String(formData.get("appointment_time") ?? "");
 
-    if (appointmentDate < today) {
-      setMessage("La fecha del turno no puede ser anterior a hoy.");
+    const clientEmail = String(formData.get("client_email") ?? "").trim();
+
+ const emailRegex =
+  /^[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)?(gmail|outlook|hotmail|yahoo)\.com$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(com\.ar|com|org|net|edu|gov)$/i;
+  if (!clientEmail || !emailRegex.test(clientEmail)) {
+    setMessage(
+      "Ingresá un correo válido. Ej: usuario@gmail.com"
+    );
+    setLoading(false);
+    return;
+  }
+
+    if (appointmentDate > maxDate) {
+      setMessage("Solo podés reservar turnos hasta un año y medio desde hoy.");
       setLoading(false);
       return;
     }
@@ -87,7 +111,7 @@ export default function NewAppointmentForm() {
 
     const newAppointment = {
       client_name: String(formData.get("client_name") ?? ""),
-      client_email: String(formData.get("client_email") ?? ""),
+      client_email: clientEmail,      
       appointment_date: appointmentDate,
       appointment_time: appointmentTime,
       status: String(formData.get("status") ?? "pending"),
@@ -137,9 +161,11 @@ export default function NewAppointmentForm() {
           <div>
             <label className="block text-sm text-zinc-300">Email</label>
             <input
+               title="Ingresá un correo válido. Ej: usuario@gmail.com"
               name="client_email"
               type="email"
               required
+              pattern="^[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)?(gmail|outlook|hotmail|yahoo)\.com$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(com\.ar|com|org|net|edu|gov)$"              title="Ingresá un correo válido. Ejemplo: juan@email.com"
               placeholder="juan@email.com"
               className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
             />
@@ -153,6 +179,7 @@ export default function NewAppointmentForm() {
                 type="date"
                 required
                 min={today}
+                max={maxDate}
                 value={selectedDate}
                 onChange={handleDateChange}
                 className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"

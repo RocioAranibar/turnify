@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 type Appointment = {
@@ -40,6 +40,7 @@ export default function AppointmentsTable({
 }: {
   appointments: Appointment[];
 }) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
 
@@ -93,7 +94,6 @@ export default function AppointmentsTable({
               <th className="px-4 py-4">Fecha</th>
               <th className="px-4 py-4">Hora</th>
               <th className="px-4 py-4">Estado</th>
-              <th className="px-4 py-4">Acciones</th>
             </tr>
           </thead>
 
@@ -101,7 +101,8 @@ export default function AppointmentsTable({
             {filteredAppointments.map((appointment) => (
               <tr
                 key={appointment.id}
-                className="border-t border-zinc-800 hover:bg-zinc-900/60"
+                onClick={() => router.push(`/appointments/${appointment.id}`)}
+                className="cursor-pointer border-t border-zinc-800 hover:bg-zinc-900/60"
               >
                 <td className="px-4 py-4">{appointment.client_name}</td>
 
@@ -111,7 +112,9 @@ export default function AppointmentsTable({
 
                 <td className="px-4 py-4">{appointment.appointment_date}</td>
 
-                <td className="px-4 py-4">{appointment.appointment_time}</td>
+                <td className="px-4 py-4">
+                  {appointment.appointment_time.slice(0, 5)}
+                </td>
 
                 <td className="px-4 py-4">
                   <span
@@ -122,21 +125,12 @@ export default function AppointmentsTable({
                     {getStatusLabel(appointment.status)}
                   </span>
                 </td>
-
-                <td className="px-4 py-4">
-                  <Link
-                    href={`/appointments/${appointment.id}`}
-                    className="rounded-lg bg-zinc-800 px-3 py-2 text-sm hover:bg-zinc-700"
-                  >
-                    Ver
-                  </Link>
-                </td>
               </tr>
             ))}
 
             {filteredAppointments.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-zinc-400">
+                <td colSpan={5} className="px-4 py-8 text-center text-zinc-400">
                   No se encontraron turnos.
                 </td>
               </tr>

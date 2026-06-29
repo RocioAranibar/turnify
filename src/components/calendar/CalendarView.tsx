@@ -20,45 +20,82 @@ export default function CalendarView({
 }) {
   const router = useRouter();
 
-  const events = appointments
+  const groupedByDate = appointments
     .filter(
       (appointment) =>
         appointment.status === "confirmed" || appointment.status === "pending"
     )
-    .map((appointment) => ({
-      id: appointment.id,
-      title: `${appointment.client_name} ${appointment.appointment_time.slice(
-        0,
-        5
-      )}`,
-      date: appointment.appointment_date,
-      backgroundColor:
-        appointment.status === "confirmed" ? "#16a34a" : "#ca8a04",
-      borderColor:
-        appointment.status === "confirmed" ? "#16a34a" : "#ca8a04",
-    }));
+    .reduce<Record<string, { confirmed: number; pending: number }>>(
+      (acc, appointment) => {
+        const date = appointment.appointment_date;
+
+        if (!acc[date]) {
+          acc[date] = {
+            confirmed: 0,
+            pending: 0,
+          };
+        }
+
+        if (appointment.status === "confirmed") {
+          acc[date].confirmed += 1;
+        }
+
+        if (appointment.status === "pending") {
+          acc[date].pending += 1;
+        }
+
+        return acc;
+      },
+      {}
+    );
+
+  const events = Object.entries(groupedByDate).flatMap(([date, counts]) => {
+    const dayEvents = [];
+
+    if (counts.confirmed > 0) {
+        dayEvents.push({
+        title: `${counts.confirmed} confirmado${counts.confirmed > 1 ? "s" : ""}`,
+        date,
+        backgroundColor: "#15803d",
+        borderColor: "#15803d",
+        textColor: "#dcfce7",
+        });
+    }
+
+    if (counts.pending > 0) {
+        dayEvents.push({
+        title: `${counts.pending} pendiente${counts.pending > 1 ? "s" : ""}`,
+        date,
+        backgroundColor: "#ca8a04",
+        borderColor: "#ca8a04",
+        textColor: "#fef3c7",
+        });
+    }
+
+    return dayEvents;
+  });
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
-    <FullCalendar
-    plugins={[dayGridPlugin, interactionPlugin]}
-    initialView="dayGridMonth"
-    events={events}
-    eventClick={(info) => {
-        router.push(`/appointments/${info.event.id}`);
-    }}
-    height="auto"
-    locale="es"
-    buttonText={{
-        today: "Hoy",
-        month: "Mes",
-    }}
-    headerToolbar={{
-        left: "today prev,next",
-        center: "title",
-        right: "dayGridMonth",
-    }}
-    />
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-6 shadow-lg">
+      <FullCalendar
+        plugins={[dayGridPlugin, interactionPlugin]}
+        initialView="dayGridMonth"
+        events={events}
+        height="auto"
+        locale="es"
+        buttonText={{
+          today: "Hoy",
+          month: "Mes",
+        }}
+        headerToolbar={{
+          left: "today prev,next",
+          center: "title",
+          right: "dayGridMonth",
+        }}
+        dateClick={(info) => {
+          router.push(`/appointments?date=${info.dateStr}`);
+        }}
+      />
     </div>
   );
 }
