@@ -37,19 +37,12 @@ export default function HomePage() {
             de usar.
           </p>
 
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-            <Link
-              href="/dashboard"
-              className="rounded-xl bg-blue-600 px-6 py-3 text-center font-semibold hover:bg-blue-500"
-            >
-              Comenzar ahora
-            </Link>
-
+          <div className="mt-8">
             <Link
               href="/login"
-              className="rounded-xl border border-zinc-700 px-6 py-3 text-center font-semibold text-zinc-300 hover:bg-zinc-900"
+              className="inline-flex rounded-xl bg-blue-600 px-8 py-3 text-center font-semibold transition hover:bg-blue-500"
             >
-              Iniciar sesión
+              Comenzar ahora
             </Link>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import LoginForm from "./LoginForm";
-export default function LoginPage() {
+import RegisterForm from "./RegisterForm";
+export default function RegisterPage() {
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <div className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-6">
@@ -10,16 +10,14 @@ export default function LoginPage() {
               Turnify
             </Link>
 
-            <h1 className="mt-10 text-4xl font-bold">
-              Bienvenido de nuevo
-            </h1>
+            <h1 className="mt-10 text-4xl font-bold">Creá tu cuenta</h1>
 
             <p className="mt-4 max-w-md text-zinc-400">
-              Iniciá sesión para continuar gestionando tus turnos.
+              Registrate para comenzar a gestionar turnos desde un único panel.
             </p>
           </div>
 
-          <LoginForm />
+          <RegisterForm />
         </section>
       </div>
     </main>
