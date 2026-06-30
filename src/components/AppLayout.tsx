@@ -7,6 +7,8 @@ import {
   CalendarPlus,
   CalendarCheck,
   Settings,
+  Stethoscope,
+   Users,
 } from "lucide-react";
 
 export default function AppLayout({
@@ -37,6 +39,21 @@ export default function AppLayout({
               >
                 <CalendarCheck size={18} />
                 Turnos
+              </Link>
+                <Link
+                  href="/doctors"
+                  className="flex items-center gap-3 rounded-xl px-4 py-3 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                >
+                  <Stethoscope size={18} />
+                  Médicos
+                </Link>
+
+              <Link
+                href="/patients"
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+              >
+                <Users size={18} />
+                Pacientes
               </Link>
 
               <Link

@@ -1,16 +1,16 @@
-import Link from "next/link";
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import AppLayout from "@/components/AppLayout";
-import AppointmentsTable from "./AppointmentsTable";
+import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { Plus } from "lucide-react";
+import Link from "next/link";
+import DoctorsTable from "./DoctorsTable";
 
-export default async function AppointmentsPage() {
+export default async function DoctorsPage() {
   const supabase = await createServerSupabaseClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-console.log("USUARIO LOGUEADO:", user?.id, user?.email);
+
   if (!user) {
     return (
       <AppLayout>
@@ -19,16 +19,16 @@ console.log("USUARIO LOGUEADO:", user?.id, user?.email);
     );
   }
 
-  const { data: appointments, error } = await supabase
-    .from("appointments")
+  const { data: doctors, error } = await supabase
+    .from("doctors")
     .select("*")
     .eq("user_id", user.id)
-    .order("appointment_date", { ascending: true });
+    .order("full_name");
 
   if (error) {
     return (
       <AppLayout>
-        <p>Error al cargar turnos: {error.message}</p>
+        <p>Error: {error.message}</p>
       </AppLayout>
     );
   }
@@ -36,18 +36,23 @@ console.log("USUARIO LOGUEADO:", user?.id, user?.email);
   return (
     <AppLayout>
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Turnos</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Médicos</h1>
+          <p className="mt-2 text-zinc-400">
+            Gestioná los médicos del consultorio.
+          </p>
+        </div>
 
         <Link
-          href="/appointments/new"
+          href="/doctors/new"
           className="flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-3 font-semibold hover:bg-violet-500"
         >
           <Plus size={18} />
-          Nuevo turno
+          Nuevo médico
         </Link>
       </div>
 
-      <AppointmentsTable appointments={appointments ?? []} />
+      <DoctorsTable doctors={doctors ?? []} />
     </AppLayout>
   );
 }

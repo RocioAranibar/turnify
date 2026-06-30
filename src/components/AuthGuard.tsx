@@ -1,19 +1,22 @@
 "use client";
 
-import { supabase } from "@/lib/supabase";
+import { createBrowserSupabaseClient } from "@/lib/supabaseBrowser";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const supabase = useMemo(() => createBrowserSupabaseClient(), []);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     async function checkSession() {
-      const { data } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-      if (!data.session) {
-        router.push("/login");
+      if (!session) {
+        router.replace("/login");
         return;
       }
 
@@ -21,7 +24,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     }
 
     checkSession();
-  }, [router]);
+  }, [router, supabase]);
 
   if (checking) {
     return (

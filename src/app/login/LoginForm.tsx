@@ -1,9 +1,11 @@
 "use client";
 
-import { supabase } from "@/lib/supabase";
+import { createBrowserSupabaseClient } from "@/lib/supabaseBrowser";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+const supabase = createBrowserSupabaseClient();
 
 export default function LoginForm() {
   const router = useRouter();
@@ -31,7 +33,7 @@ export default function LoginForm() {
       return;
     }
 
-    router.push("/dashboard");
+    router.replace("/dashboard");
     router.refresh();
   }
 

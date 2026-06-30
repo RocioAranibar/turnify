@@ -1,12 +1,37 @@
 "use client";
 
 import AppLayout from "@/components/AppLayout";
-import { getBusyHoursByDateExcludingAppointment } from "@/lib/appointments";
 import { availableHours } from "@/lib/schedule";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+type Appointment = {
+  id: string;
+  client_name: string;
+  client_email: string;
+  appointment_date: string;
+  appointment_time: string;
+  status: string;
+  notes: string | null;
+  specialty: string | null;
+  doctor: string | null;
+  doctor_id: string | null;
+  office: string | null;
+};
+
+type Doctor = {
+  id: string;
+  full_name: string;
+  specialty: string;
+  active: boolean;
+};
+
+const offices = ["Consultorio 1", "Consultorio 2", "Consultorio 3"];
+
+const emailRegex =
+  /^[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)?(gmail|outlook|hotmail|yahoo)\.com$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(com\.ar|com|org|net|edu|gov)$/i;
 
 function getTodayLocal() {
   const now = new Date();
@@ -28,18 +53,14 @@ function getMaxDate() {
 const today = getTodayLocal();
 const maxDate = getMaxDate();
 
-type Appointment = {
-  id: string;
-  client_name: string;
-  client_email: string;
-  appointment_date: string;
-  appointment_time: string;
-  status: string;
-  notes: string | null;
-};
+function isPastTimeToday(date: string, time: string) {
+  if (date !== today) return false;
 
-const emailRegex =
-  /^[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)?(gmail|outlook|hotmail|yahoo)\.com$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(com\.ar|com|org|net|edu|gov)$/i;
+  const now = new Date();
+  const currentTime = now.toTimeString().slice(0, 5);
+
+  return time <= currentTime;
+}
 
 export default function EditAppointmentForm({
   appointment,
@@ -47,27 +68,74 @@ export default function EditAppointmentForm({
   appointment: Appointment;
 }) {
   const router = useRouter();
+
   const [loading, setLoading] = useState(false);
+  const [loadingDoctors, setLoadingDoctors] = useState(true);
   const [message, setMessage] = useState("");
+
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [selectedSpecialty, setSelectedSpecialty] = useState(
+    appointment.specialty ?? ""
+  );
+  const [selectedDoctorId, setSelectedDoctorId] = useState(
+    appointment.doctor_id ?? ""
+  );
   const [selectedDate, setSelectedDate] = useState(appointment.appointment_date);
-  const [busyHours, setBusyHours] = useState<string[]>([]);
 
-  async function handleDateChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const date = event.target.value;
-    setSelectedDate(date);
-    setBusyHours([]);
+  useEffect(() => {
+    async function loadDoctors() {
+      const { data, error } = await supabase
+        .from("doctors")
+        .select("id, full_name, specialty, active")
+        .eq("active", true)
+        .order("full_name");
 
-    if (!date) return;
+      if (error) {
+        setMessage(`Error al cargar médicos: ${error.message}`);
+        setLoadingDoctors(false);
+        return;
+      }
 
-    try {
-      const busy = await getBusyHoursByDateExcludingAppointment(
-        date,
-        appointment.id
-      );
-      setBusyHours(busy);
-    } catch {
-      setMessage("No se pudieron cargar los horarios ocupados.");
+      setDoctors(data ?? []);
+      setLoadingDoctors(false);
     }
+
+    loadDoctors();
+  }, []);
+
+  const specialties = useMemo(() => {
+    return Array.from(new Set(doctors.map((doctor) => doctor.specialty)));
+  }, [doctors]);
+
+  const filteredDoctors = useMemo(() => {
+    return doctors.filter((doctor) => doctor.specialty === selectedSpecialty);
+  }, [doctors, selectedSpecialty]);
+
+  async function isSlotUnavailable({
+    date,
+    time,
+    doctorId,
+    office,
+  }: {
+    date: string;
+    time: string;
+    doctorId: string;
+    office: string;
+  }) {
+    const { data, error } = await supabase
+      .from("appointments")
+      .select("id")
+      .eq("appointment_date", date)
+      .eq("appointment_time", time)
+      .in("status", ["pending", "confirmed"])
+      .neq("id", appointment.id)
+      .or(`doctor_id.eq.${doctorId},office.eq.${office}`);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return (data ?? []).length > 0;
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -80,11 +148,26 @@ export default function EditAppointmentForm({
     const clientEmail = String(formData.get("client_email") ?? "").trim();
     const appointmentDate = String(formData.get("appointment_date") ?? "");
     const appointmentTime = String(formData.get("appointment_time") ?? "");
+    const specialty = String(formData.get("specialty") ?? "");
+    const doctorId = String(formData.get("doctor_id") ?? "");
+    const office = String(formData.get("office") ?? "");
 
-    if (!emailRegex.test(clientEmail)) {
-      setMessage(
-        "Ingresá un correo válido. Ej: usuario@gmail.com o usuario@empresa.com.ar"
-      );
+    const selectedDoctor = doctors.find((doctor) => doctor.id === doctorId);
+
+    if (!specialty) {
+      setMessage("Seleccioná una especialidad.");
+      setLoading(false);
+      return;
+    }
+
+    if (!doctorId || !selectedDoctor) {
+      setMessage("Seleccioná un médico.");
+      setLoading(false);
+      return;
+    }
+
+    if (!office) {
+      setMessage("Seleccioná un consultorio.");
       setLoading(false);
       return;
     }
@@ -101,24 +184,44 @@ export default function EditAppointmentForm({
       return;
     }
 
-    const updatedBusyHours = await getBusyHoursByDateExcludingAppointment(
-      appointmentDate,
-      appointment.id
-    );
+    if (isPastTimeToday(appointmentDate, appointmentTime)) {
+      setMessage("No podés reservar un horario que ya pasó.");
+      setLoading(false);
+      return;
+    }
 
-    if (updatedBusyHours.includes(appointmentTime)) {
-      setMessage("Ese horario ya está ocupado por otro turno.");
+    try {
+      const unavailable = await isSlotUnavailable({
+        date: appointmentDate,
+        time: appointmentTime,
+        doctorId,
+        office,
+      });
+
+      if (unavailable) {
+        setMessage(
+          "Ese horario no está disponible: el médico o el consultorio ya tiene un turno."
+        );
+        setLoading(false);
+        return;
+      }
+    } catch {
+      setMessage("No se pudo validar la disponibilidad del turno.");
       setLoading(false);
       return;
     }
 
     const updatedAppointment = {
-      client_name: String(formData.get("client_name") ?? ""),
-      client_email: clientEmail,
+      client_name: appointment.client_name,
+      client_email: appointment.client_email,
       appointment_date: appointmentDate,
       appointment_time: appointmentTime,
       status: String(formData.get("status") ?? "pending"),
       notes: String(formData.get("notes") ?? ""),
+      specialty,
+      doctor_id: doctorId,
+      doctor: selectedDoctor.full_name,
+      office,
     };
 
     const { data, error } = await supabase
@@ -155,21 +258,20 @@ export default function EditAppointmentForm({
 
         <section className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900/80 p-6 shadow-lg">
           <h1 className="text-2xl font-bold">Editar turno</h1>
-          <p className="mt-2 text-zinc-400">
-            Modificá los datos del turno.
-          </p>
+          <p className="mt-2 text-zinc-400">Modificá los datos del turno.</p>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
             <div className="grid gap-5 md:grid-cols-2">
               <div>
                 <label className="block text-sm text-zinc-300">
-                  Nombre del cliente
+                  Nombre del paciente
                 </label>
                 <input
                   name="client_name"
                   type="text"
                   required
                   defaultValue={appointment.client_name}
+                  disabled
                   className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
                 />
               </div>
@@ -183,8 +285,81 @@ export default function EditAppointmentForm({
                   pattern="^[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)?(gmail|outlook|hotmail|yahoo)\.com$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+\.(com\.ar|com|org|net|edu|gov)$"
                   title="Ingresá un correo válido. Ej: usuario@gmail.com o usuario@empresa.com.ar"
                   defaultValue={appointment.client_email}
+                  disabled
                   className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm text-zinc-300">
+                  Especialidad
+                </label>
+                <select
+                  name="specialty"
+                  required
+                  value={selectedSpecialty}
+                  disabled={loadingDoctors}
+                  onChange={(event) => {
+                    setSelectedSpecialty(event.target.value);
+                    setSelectedDoctorId("");
+                  }}
+                  className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500 disabled:opacity-60"
+                >
+                  <option value="">
+                    {loadingDoctors
+                      ? "Cargando especialidades..."
+                      : "Seleccioná una especialidad"}
+                  </option>
+
+                  {specialties.map((specialty) => (
+                    <option key={specialty} value={specialty}>
+                      {specialty}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm text-zinc-300">Médico</label>
+                <select
+                  name="doctor_id"
+                  required
+                  value={selectedDoctorId}
+                  disabled={!selectedSpecialty}
+                  onChange={(event) => setSelectedDoctorId(event.target.value)}
+                  className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500 disabled:opacity-60"
+                >
+                  <option value="">
+                    {selectedSpecialty
+                      ? "Seleccioná un médico"
+                      : "Primero elegí una especialidad"}
+                  </option>
+
+                  {filteredDoctors.map((doctor) => (
+                    <option key={doctor.id} value={doctor.id}>
+                      {doctor.full_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm text-zinc-300">
+                  Consultorio
+                </label>
+                <select
+                  name="office"
+                  required
+                  defaultValue={appointment.office ?? ""}
+                  className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
+                >
+                  <option value="">Seleccioná un consultorio</option>
+                  {offices.map((office) => (
+                    <option key={office} value={office}>
+                      {office}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -196,7 +371,7 @@ export default function EditAppointmentForm({
                   min={today}
                   max={maxDate}
                   value={selectedDate}
-                  onChange={handleDateChange}
+                  onChange={(event) => setSelectedDate(event.target.value)}
                   className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
                 />
               </div>
@@ -210,25 +385,17 @@ export default function EditAppointmentForm({
                   className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
                 >
                   {availableHours.map((hour) => {
-                    const isBusy = busyHours.includes(hour);
+                    const isPast = isPastTimeToday(selectedDate, hour);
 
                     return (
-                      <option key={hour} value={hour} disabled={isBusy}>
-                        {isBusy ? `${hour} hs - Ocupado` : `${hour} hs`}
+                      <option key={hour} value={hour} disabled={isPast}>
+                        {isPast
+                          ? `${hour} hs - Horario pasado`
+                          : `${hour} hs`}
                       </option>
                     );
                   })}
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-sm text-zinc-300">Notas</label>
-                <textarea
-                  name="notes"
-                  rows={4}
-                  defaultValue={appointment.notes ?? ""}
-                  className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
-                />
               </div>
 
               <div>
@@ -238,10 +405,19 @@ export default function EditAppointmentForm({
                   defaultValue={appointment.status}
                   className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
                 >
-                  <option value="pending">Pendiente</option>
                   <option value="confirmed">Confirmado</option>
                   <option value="cancelled">Cancelado</option>
                 </select>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm text-zinc-300">Notas</label>
+                <textarea
+                  name="notes"
+                  rows={4}
+                  defaultValue={appointment.notes ?? ""}
+                  className="mt-2 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-3 outline-none focus:border-blue-500"
+                />
               </div>
             </div>
 

@@ -1,11 +1,26 @@
 import AppLayout from "@/components/AppLayout";
 import CalendarView from "@/components/calendar/CalendarView";
-import { supabase } from "@/lib/supabase";
+import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
 export default async function CalendarPage() {
+  const supabase = await createServerSupabaseClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return (
+      <AppLayout>
+        <p>No hay usuario autenticado.</p>
+      </AppLayout>
+    );
+  }
+
   const { data: appointments, error } = await supabase
     .from("appointments")
     .select("*")
+    .eq("user_id", user.id)
     .order("appointment_date", { ascending: true });
 
   if (error) {
@@ -21,7 +36,7 @@ export default async function CalendarPage() {
       <div>
         <h1 className="text-3xl font-bold">Calendario</h1>
         <p className="mt-2 text-zinc-400">
-          Visualizá tus turnos confirmados y pendientes.
+          Visualizá tus turnos confirmados, realizados y cancelados.
         </p>
       </div>
 
