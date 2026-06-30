@@ -1,6 +1,6 @@
 "use client";
 
-import { supabase } from "@/lib/supabase";
+import { createBrowserSupabaseClient } from "@/lib/supabaseBrowser";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -9,6 +9,7 @@ import { useState } from "react";
   
     export default function RegisterForm() {
   const router = useRouter();
+  const supabase = createBrowserSupabaseClient();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
