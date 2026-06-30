@@ -1,34 +1,330 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Getting Started
+# 🩺 Turnify
 
-First, run the development server:
+### Sistema de Gestión de Turnos Médicos
+
+Aplicación web desarrollada con **Next.js**, **TypeScript** y **Supabase** para administrar consultorios médicos de forma moderna, segura y completamente multiusuario.
+
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![React](https://img.shields.io/badge/React-19-61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)
+![Tailwind](https://img.shields.io/badge/TailwindCSS-4-38BDF8)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E)
+
+</div>
+
+---
+
+# 📖 Descripción
+
+Turnify es una plataforma web para la gestión de turnos médicos.
+
+Cada profesional posee su propia cuenta y administra únicamente:
+
+- 👨‍⚕️ Médicos
+- 👥 Pacientes
+- 📅 Turnos
+- 📊 Estadísticas
+- 📆 Calendario
+
+Toda la información permanece aislada mediante autenticación y políticas de seguridad.
+
+---
+
+# ✨ Características
+
+- Registro e inicio de sesión
+- Dashboard con estadísticas
+- Gestión de pacientes
+- Gestión de médicos
+- Gestión de turnos
+- Calendario interactivo
+- Búsqueda inteligente
+- Estados de turnos
+- Sistema multiusuario
+- Responsive Design
+
+---
+
+# 📸 Capturas
+
+## Login
+
+> Agregar imagen
+
+---
+
+## Dashboard
+
+> Agregar imagen
+
+---
+
+## Turnos
+
+> Agregar imagen
+
+---
+
+## Pacientes
+
+> Agregar imagen
+
+---
+
+## Médicos
+
+> Agregar imagen
+
+---
+
+## Calendario
+
+> Agregar imagen
+
+---
+
+# 🏗 Arquitectura
+
+```text
+                  Usuario
+                     │
+                     ▼
+        ┌────────────────────────┐
+        │     Next.js App Router │
+        └────────────────────────┘
+                     │
+      ┌──────────────┴──────────────┐
+      │                             │
+ Server Components          Client Components
+      │                             │
+      └──────────────┬──────────────┘
+                     │
+              Supabase Auth
+                     │
+               PostgreSQL
+```
+
+---
+
+# 🗄 Modelo de datos
+
+```text
+                    USERS
+                      │
+                  user_id
+                      │
+        ┌─────────────┼─────────────┐
+        ▼             ▼             ▼
+
+     PATIENTS      DOCTORS     APPOINTMENTS
+        │             │             │
+        └────── patient_id ─────────┘
+                      │
+                 doctor_id
+```
+
+---
+
+# 🔒 Seguridad
+
+El sistema implementa:
+
+- Autenticación mediante Supabase Auth
+- Server Side Authentication (SSR)
+- Row Level Security (RLS)
+- Protección de rutas privadas
+- Validación de formularios
+- Validación de correos
+- Separación completa de datos por usuario
+
+Cada registro almacena:
+
+```text
+user_id
+```
+
+permitiendo que cada profesional visualice únicamente su propia información.
+
+---
+
+# 📊 Dashboard
+
+El Dashboard presenta información resumida del consultorio.
+
+Incluye:
+
+- Turnos del día
+- Confirmados
+- Realizados
+- Cancelados
+- Próximos turnos
+- Agenda diaria
+- Estadísticas semanales
+
+---
+
+# 👨‍⚕️ Gestión de Médicos
+
+Permite:
+
+- Registrar médicos
+- Editar información
+- Activar/Desactivar
+- Especialidades
+
+Cada médico pertenece únicamente al usuario autenticado.
+
+---
+
+# 👥 Gestión de Pacientes
+
+Permite:
+
+- Alta de pacientes
+- Modificación
+- Búsqueda
+- Asociación con turnos
+
+Los pacientes son privados para cada cuenta.
+
+---
+
+# 📅 Gestión de Turnos
+
+Funciones disponibles:
+
+- Crear turno
+- Editar turno
+- Cancelar turno
+- Marcar como realizado
+- Consultar detalle
+
+Estados:
+
+- Confirmado
+- Realizado
+- Cancelado
+
+No existen estados pendientes.
+
+Los turnos cancelados no pueden reactivarse.
+
+El sistema impide reservar dos turnos para un mismo médico en el mismo horario.
+
+---
+
+# 📆 Calendario
+
+El calendario permite visualizar la agenda mensual.
+
+Cada día muestra:
+
+- Cantidad de turnos confirmados
+- Cantidad de realizados
+- Cantidad de cancelados
+
+Al seleccionar un día se accede directamente a los turnos filtrados de esa fecha.
+
+---
+
+# ⚙ Tecnologías
+
+| Tecnología | Función |
+|------------|---------|
+| Next.js | Framework |
+| React | Componentes |
+| TypeScript | Tipado |
+| Tailwind CSS | Estilos |
+| Supabase | Backend |
+| PostgreSQL | Base de datos |
+| FullCalendar | Calendario |
+| Lucide React | Iconografía |
+
+---
+
+# 📂 Estructura del proyecto
+
+```text
+src
+│
+├── app
+│   ├── dashboard
+│   ├── appointments
+│   ├── doctors
+│   ├── patients
+│   ├── calendar
+│   ├── login
+│   └── register
+│
+├── components
+│   ├── calendar
+│   ├── AuthGuard
+│   ├── AppLayout
+│   └── ...
+│
+├── lib
+│   ├── supabase.ts
+│   ├── supabaseBrowser.ts
+│   └── supabaseServer.ts
+│
+└── public
+```
+
+---
+
+# 🚀 Instalación
+
+## Clonar
+
+```bash
+git clone https://github.com/TU_USUARIO/turnify.git
+```
+
+## Instalar
+
+```bash
+npm install
+```
+
+## Variables de entorno
+
+Crear un archivo `.env.local`
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=TU_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=TU_ANON_KEY
+```
+
+## Ejecutar
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# 🔮 Próximas mejoras
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Recordatorios por correo electrónico
+- Notificaciones por WhatsApp
+- Horarios configurables por médico
+- Múltiples consultorios
+- Exportación PDF
+- Reportes avanzados
+- Historia clínica
+- Obras sociales
+- Roles (Administrador, Secretario y Médico)
+- Despliegue en Vercel
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+# 👨‍💻 Autor
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Turnify**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
+Proyecto desarrollado como sistema de gestión de turnos médicos utilizando **Next.js**, **Supabase** y **TypeScript**.
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
