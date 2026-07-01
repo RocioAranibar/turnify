@@ -67,7 +67,7 @@ Toda la información permanece aislada mediante autenticación y políticas de s
 
 ---
 
-## Pacientes
+## Nuevo Turno
 
 ![Nuevo Turno](docs/pacientes.png)
 
