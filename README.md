@@ -51,37 +51,39 @@ Toda la información permanece aislada mediante autenticación y políticas de s
 
 ## Login
 
-![Dashboard](docs/dashboard.png)
+![Dashboard](login.png)
 
 ---
 
 ## Dashboard
 
-> Agregar imagen
+![Dashboard](docs/dashboard.png)
 
 ---
 
+![Dashboard](docs/dashboard.png)
+
 ## Turnos
 
-> Agregar imagen
+![Turnos](docs/turnos_lista.png)
 
 ---
 
 ## Pacientes
 
-> Agregar imagen
+![Pacientes](pacientes.png)
 
 ---
 
 ## Médicos
 
-> Agregar imagen
+![Médicos](medicos.png)
 
 ---
 
 ## Calendario
 
-> Agregar imagen
+![Calendario](calendario.png)
 
 ---
 
