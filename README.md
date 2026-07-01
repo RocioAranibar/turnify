@@ -57,15 +57,15 @@ Toda la información permanece aislada mediante autenticación y políticas de s
 
 ## Dashboard
 
-![Dashboard](docs/dashboard.png)
+![Dashboard](dashboard.png)
 
 ---
 
-![Dashboard](docs/dashboard.png)
+![Dashboard](dashboard.png)
 
 ## Turnos
 
-![Turnos](docs/turnos_lista.png)
+![Turnos](turnos_lista.png)
 
 ---
 
