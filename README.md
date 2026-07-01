@@ -51,7 +51,7 @@ Toda la información permanece aislada mediante autenticación y políticas de s
 
 ## Login
 
-> Agregar imagen
+![Dashboard](docs/dashboard.png)
 
 ---
 
