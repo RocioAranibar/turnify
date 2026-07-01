@@ -51,7 +51,7 @@ Toda la información permanece aislada mediante autenticación y políticas de s
 
 ## Login
 
-![Dashboard](login.png)
+![Dashboard](docs/login.png)
 
 ---
 
