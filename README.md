@@ -57,33 +57,33 @@ Toda la información permanece aislada mediante autenticación y políticas de s
 
 ## Dashboard
 
-![Dashboard](dashboard.png)
+![Dashboard](docs/dashboard.png)
 
 ---
 
-![Dashboard](dashboard.png)
+![Dashboard](docs/dashboard.png)
 
 ## Turnos
 
-![Turnos](turnos_lista.png)
+![Turnos](docs/turnos_lista.png)
 
 ---
 
 ## Pacientes
 
-![Pacientes](pacientes.png)
+![Pacientes](docs/pacientes.png)
 
 ---
 
 ## Médicos
 
-![Médicos](medicos.png)
+![Médicos](docs/medicos.png)
 
 ---
 
 ## Calendario
 
-![Calendario](calendario.png)
+![Calendario](docs/calendario.png)
 
 ---
 
