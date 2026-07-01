@@ -61,8 +61,6 @@ Toda la información permanece aislada mediante autenticación y políticas de s
 
 ---
 
-![Dashboard](docs/dashboard.png)
-
 ## Turnos
 
 ![Turnos](docs/turnos_lista.png)
