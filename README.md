@@ -279,7 +279,7 @@ src
 ## Clonar
 
 ```bash
-git clone https://github.com/TU_USUARIO/turnify.git
+git clone https://github.com/RocioAranibar/turnify.git
 ```
 
 ## Instalar
