@@ -329,7 +329,7 @@ Si el horario se encuentra disponible, la cita se guarda y aparece automáticame
 
 ---
 
-# 🤖 Uso de Inteligencia Artificial durante el desarrollo
+# Uso de Inteligencia Artificial durante el desarrollo
 
 La Inteligencia Artificial fue utilizada como una **herramienta de asistencia durante el proceso de desarrollo**, especialmente para debugging, análisis de errores, revisión de código, discusión de alternativas técnicas y documentación.
 
