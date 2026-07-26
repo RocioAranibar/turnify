@@ -36,20 +36,9 @@ Turnify fue diseñado para que diferentes consultorios puedan utilizar la misma 
 
 Por ejemplo:
 
-```text
-Consultorio San Martín
-│
-├── Médicos
-├── Pacientes
-└── Turnos
-
-
-Centro Médico Belgrano
-│
-├── Médicos
-├── Pacientes
-└── Turnos
-```
+<p align="center">
+    <img src="./docs/usuarios.png" alt="Usuarios de Turnify" width="900">
+</p>
 
 Aunque ambos utilizan Turnify y comparten la misma infraestructura, cada cuenta administra únicamente la información que le pertenece.
 
@@ -73,13 +62,9 @@ Cuando el horario está disponible, el turno queda registrado y pasa a formar pa
 
 Durante su ciclo de vida puede cambiar de estado:
 
-```text
-                   ┌──► Realizado
-                   │
-Confirmado ────────┤
-                   │
-                   └──► Cancelado
-```
+<p align="center">
+    <img src="./docs/estados.png" alt="Estados de Turnify" width="900">
+</p>
 
 Se decidió que los nuevos turnos ingresen directamente como **Confirmados**, ya que dentro del flujo actual la creación de una cita representa la reserva efectiva de ese horario.
 
