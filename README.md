@@ -24,19 +24,22 @@ Por este motivo, Turnify integra toda esa información dentro de un mismo sistem
 
 Un usuario puede crear su cuenta, registrar los médicos con los que trabaja, cargar sus pacientes y posteriormente utilizar esos datos para administrar los turnos. La información puede consultarse desde una agenda tradicional, desde un calendario mensual o desde un dashboard que resume el estado actual del consultorio.
 
-Uno de los aspectos más importantes del proyecto es que fue diseñado como un **sistema multiusuario**. Cada cuenta posee su propio espacio de trabajo y administra únicamente sus médicos, pacientes y turnos.
+Uno de los aspectos más importantes de Turnify es su arquitectura **multiusuario**. 
+Cada cuenta representa un espacio de trabajo independiente, permitiendo que distintos 
+consultorios utilicen la misma aplicación sin compartir información entre sí.
+
+Por ejemplo:
 
 ```text
-Rocío
+Consultorio San Martín
 ├── Médicos
 ├── Pacientes
 └── Turnos
 
-Juan
+Centro Médico Belgrano
 ├── Médicos
 ├── Pacientes
 └── Turnos
-```
 
 Aunque ambas cuentas utilizan la misma aplicación y base de datos, Turnify utiliza la identidad proporcionada por Supabase Auth para mantener la información separada.
 
