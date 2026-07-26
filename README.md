@@ -310,13 +310,13 @@ La información de los turnos puede visualizarse de diferentes maneras según la
 
 La agenda permite trabajar con información detallada sobre cada cita, mientras que el calendario ofrece una perspectiva temporal más clara de la actividad mensual.
 
+<p align="center">
+    <img src="./docs/turnos_lista.png" alt="Turnos de Turnify" width="900">
+</p>
 Desde el calendario es posible identificar rápidamente los días con citas y acceder a la información correspondiente.
 
 <p align="center">
     <img src="./docs/calendario.png" alt="Calendario de Turnify" width="900">
-</p>
-<p align="center">
-    <img src="./docs/turnos_lista.png" alt="Turnos de Turnify" width="900">
 </p>
 
 Estas dos vistas trabajan sobre la misma información almacenada en PostgreSQL, pero la presentan de manera diferente según el contexto de uso.
