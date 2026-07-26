@@ -2,153 +2,185 @@
 
 # 🩺 Turnify
 
-### Sistema web multiusuario para la gestión de turnos médicos
+### Gestión de turnos médicos simple, centralizada y multiusuario
 
-Turnify centraliza la administración de **pacientes, médicos y turnos** de un consultorio en una única aplicación, incorporando autenticación, agenda, calendario y estadísticas.
+Turnify es una aplicación web que permite administrar **médicos, pacientes y turnos** desde un único lugar, incorporando autenticación, calendario, control de disponibilidad y estadísticas.
 
-Desarrollado con **Next.js · TypeScript · Supabase · PostgreSQL**
+Desarrollado con **Next.js · TypeScript · Supabase · PostgreSQL · Tailwind CSS**
 
-**[🚀 Ver demo online](https://turnify-five.vercel.app)**
+### 🚀 [Ver Turnify en funcionamiento](https://turnify-five.vercel.app)
 
 </div>
 
 ---
 
-# 📖 ¿Qué es Turnify?
+# 📖 Sobre Turnify
 
-Turnify es una aplicación web desarrollada para simplificar la administración diaria de un consultorio médico.
+Turnify nació con el objetivo de resolver un problema cotidiano en la administración de consultorios: gestionar pacientes, profesionales y citas sin depender de información distribuida en diferentes herramientas.
 
-El problema que busca resolver no es solamente registrar una cita. La gestión de una agenda implica relacionar pacientes con profesionales, controlar horarios disponibles, conocer el estado de cada atención y poder consultar rápidamente qué ocurrió o qué ocurrirá durante el día.
+Registrar un turno parece una operación sencilla, pero a medida que aumenta la cantidad de pacientes y profesionales aparecen nuevos problemas: conocer rápidamente la disponibilidad de un médico, evitar superposiciones, consultar las próximas citas, identificar el estado de cada turno y mantener organizada la información de los pacientes.
 
-Por este motivo, Turnify integra toda esa información dentro de un mismo sistema.
+Turnify centraliza todo este proceso.
 
-Un usuario puede crear su cuenta, registrar los médicos con los que trabaja, cargar sus pacientes y posteriormente utilizar esos datos para administrar los turnos. La información puede consultarse desde una agenda tradicional, desde un calendario mensual o desde un dashboard que resume el estado actual del consultorio.
+Desde una misma aplicación, un usuario puede registrar los profesionales de su consultorio, administrar sus pacientes, programar nuevas citas y visualizar su agenda mediante diferentes perspectivas.
 
-Uno de los aspectos más importantes de Turnify es su arquitectura **multiusuario**. 
-Cada cuenta representa un espacio de trabajo independiente, permitiendo que distintos 
-consultorios utilicen la misma aplicación sin compartir información entre sí.
+El sistema incorpora además un dashboard que resume la actividad y permite conocer rápidamente el estado actual de la agenda.
+
+---
+
+# 🏥 Un sistema preparado para múltiples consultorios
+
+Uno de los aspectos centrales del proyecto es su funcionamiento **multiusuario**.
+
+Turnify fue diseñado para que diferentes consultorios puedan utilizar la misma aplicación manteniendo sus espacios de trabajo independientes.
 
 Por ejemplo:
 
 ```text
 Consultorio San Martín
+│
 ├── Médicos
 ├── Pacientes
 └── Turnos
+
 
 Centro Médico Belgrano
+│
 ├── Médicos
 ├── Pacientes
 └── Turnos
-
-Aunque ambas cuentas utilizan la misma aplicación y base de datos, Turnify utiliza la identidad proporcionada por Supabase Auth para mantener la información separada.
-
----
-
-# 🎯 Del problema a la solución
-
-Una agenda médica comienza siendo sencilla, pero aumenta rápidamente su complejidad cuando aparecen múltiples profesionales, pacientes recurrentes, cancelaciones y consultas sobre disponibilidad.
-
-Turnify busca que el administrador pueda responder desde un único lugar preguntas cotidianas como **qué turnos tengo hoy, quién será atendido, con qué profesional, qué horarios siguen disponibles y qué ocurrió con las citas anteriores**.
-
-Para conseguirlo, el sistema no trata pacientes, médicos y turnos como información aislada. Las tres entidades están relacionadas entre sí.
-
-Cuando se crea un turno, se selecciona un paciente previamente registrado y un médico disponible. Antes de guardar la cita, el sistema controla que ese profesional no tenga otro turno reservado en la misma fecha y horario.
-
-Una vez creada, la cita puede avanzar desde **Confirmada** hacia **Realizada** o **Cancelada**.
-
-```text
-                 ┌─── Realizado
-Confirmado ──────┤
-                 └─── Cancelado
 ```
 
-Se decidió no utilizar un estado “Pendiente” porque dentro del flujo actual crear un turno implica reservar efectivamente ese horario.
+Aunque ambos utilizan Turnify y comparten la misma infraestructura, cada cuenta administra únicamente la información que le pertenece.
+
+De esta manera, un profesional registrado por el Consultorio San Martín no aparecerá dentro del Centro Médico Belgrano, y lo mismo ocurre con pacientes y turnos.
+
+Esta separación se consigue utilizando la identidad del usuario autenticado como parte del modelo de datos y de las consultas realizadas a la base.
 
 ---
 
-# 🔄 Flujo principal: creación de un turno
+# 💡 ¿Cómo funciona?
 
-La creación de turnos concentra gran parte de la lógica del proyecto porque combina autenticación, pacientes, médicos, disponibilidad y persistencia de datos.
+El funcionamiento de Turnify parte de una idea sencilla: **pacientes, médicos y turnos no son elementos independientes, sino partes de un mismo flujo de trabajo**.
+
+Primero se registran los pacientes y profesionales del consultorio. Una vez disponibles esos datos, pueden utilizarse para programar citas.
+
+Al crear un turno, el usuario selecciona un paciente existente, el profesional que realizará la atención, la fecha y el horario.
+
+Antes de registrar la cita, Turnify verifica la disponibilidad del médico. Si ese profesional ya posee una reserva para la misma fecha y horario, el sistema impide generar la superposición.
+
+Cuando el horario está disponible, el turno queda registrado y pasa a formar parte de la agenda y del calendario.
+
+Durante su ciclo de vida puede cambiar de estado:
+
+```text
+                   ┌──► Realizado
+                   │
+Confirmado ────────┤
+                   │
+                   └──► Cancelado
+```
+
+Se decidió que los nuevos turnos ingresen directamente como **Confirmados**, ya que dentro del flujo actual la creación de una cita representa la reserva efectiva de ese horario.
+
+---
+
+# 🔄 Flujo principal del sistema
+
+La creación de un turno es uno de los procesos más importantes de Turnify porque combina autenticación, pacientes, médicos, reglas de disponibilidad y persistencia de información.
 
 ```mermaid
 sequenceDiagram
+
     actor U as Usuario
     participant T as Turnify
-    participant AUTH as Supabase Auth
+    participant A as Supabase Auth
     participant DB as PostgreSQL
 
-    U->>T: Inicia sesión
-    T->>AUTH: Valida credenciales
-    AUTH-->>T: Sesión + user_id
-    T-->>U: Acceso al sistema
+    U->>T: Iniciar sesión
+    T->>A: Validar credenciales
+    A-->>T: Sesión + user_id
+    T-->>U: Mostrar dashboard
 
     U->>T: Crear nuevo turno
 
-    T->>DB: Solicitar pacientes del usuario
-    T->>DB: Solicitar médicos del usuario
-    DB-->>T: Pacientes y médicos asociados al user_id
+    T->>DB: Obtener pacientes del usuario
+    DB-->>T: Pacientes disponibles
 
-    U->>T: Selecciona paciente, médico, fecha y horario
+    T->>DB: Obtener médicos del usuario
+    DB-->>T: Médicos disponibles
+
+    U->>T: Seleccionar paciente
+    U->>T: Seleccionar médico
+    U->>T: Seleccionar fecha y horario
 
     T->>DB: Consultar disponibilidad
 
     alt Horario disponible
-        T->>DB: Crear turno asociado al user_id
-        DB-->>T: Turno registrado
-        T-->>U: Actualizar agenda
+        T->>DB: Registrar turno
+        DB-->>T: Turno creado
+        T-->>U: Mostrar agenda actualizada
     else Horario ocupado
         T-->>U: Informar conflicto de horario
     end
 ```
 
-El `user_id` obtenido durante la autenticación acompaña todo el flujo. Gracias a esto, las búsquedas de pacientes y médicos se realizan sobre los datos pertenecientes a la cuenta autenticada y el nuevo turno queda asociado a esa misma cuenta.
+La autenticación es fundamental dentro de este proceso.
 
-La validación previa de disponibilidad evita que un profesional pueda recibir dos reservas en el mismo horario.
+El `user_id` obtenido mediante Supabase Auth determina qué pacientes, médicos y turnos puede consultar la cuenta activa. Cuando finalmente se registra la cita, el turno también queda asociado a ese usuario.
+
+Esto permite que el mismo flujo pueda ejecutarse simultáneamente en diferentes consultorios sin mezclar información.
 
 ---
 
 # 🏗️ Arquitectura
 
-Turnify fue construido utilizando **Next.js App Router** y Supabase como plataforma de backend.
+Turnify utiliza **Next.js con App Router** como framework principal y Supabase como plataforma de backend.
+
+Una característica importante de la arquitectura es que la aplicación ejecuta código tanto en el navegador como en el servidor.
+
+Por este motivo, la comunicación con Supabase fue separada según el contexto de ejecución.
 
 ```mermaid
-flowchart LR
-    USER[Usuario]
+flowchart TB
 
-    USER --> NEXT[Next.js]
+    U[Usuario]
 
-    NEXT --> CC[Client Components]
-    NEXT --> SC[Server Components]
+    U --> NEXT[Turnify - Next.js]
 
-    CC --> BC[Browser Supabase Client]
-    SC --> SSC[Server Supabase Client]
+    NEXT --> CLIENT[Client Components]
+    NEXT --> SERVER[Server Components]
 
-    BC --> AUTH[Supabase Auth]
+    CLIENT --> BROWSER[Supabase Browser Client]
+    SERVER --> SSC[Supabase Server Client]
+
+    BROWSER --> AUTH[Supabase Auth]
     SSC --> AUTH
 
-    BC --> DB[(PostgreSQL)]
+    BROWSER --> DB[(PostgreSQL)]
     SSC --> DB
 
-    AUTH --> UID[user_id]
-    UID --> DB
+    AUTH --> ID[Usuario autenticado]
+    ID --> DB
 ```
 
-Una decisión importante de arquitectura fue separar la comunicación con Supabase según dónde se ejecuta el código.
+Los **Client Components** utilizan un cliente de Supabase pensado para ejecutarse desde el navegador.
 
-Los componentes interactivos que funcionan en el navegador utilizan un **Browser Client**, mientras que las páginas renderizadas desde el servidor utilizan un **Server Client** capaz de recuperar la sesión mediante cookies.
+Los **Server Components**, en cambio, utilizan un cliente de servidor que recupera la sesión mediante cookies.
 
-Esta separación fue necesaria para que la identidad del usuario se mantuviera correctamente tanto en operaciones del navegador como en consultas ejecutadas durante el renderizado del servidor.
+Esta separación permite conservar correctamente la autenticación independientemente de dónde se realice la operación.
 
 ---
 
-# 🔐 Autenticación y sistema multiusuario
+# 🔐 Autenticación y aislamiento de información
 
-La autenticación se realiza mediante **Supabase Auth**.
+Turnify utiliza **Supabase Auth** para el registro, inicio de sesión y manejo de sesiones.
 
-Después del inicio de sesión, Supabase proporciona un identificador único para la cuenta. Ese `user_id` se almacena en las entidades principales del sistema y también se utiliza al realizar consultas.
+Cuando una persona inicia sesión correctamente, Supabase devuelve la identidad de la cuenta autenticada.
 
-Por ejemplo, la obtención de pacientes sigue conceptualmente esta lógica:
+Ese identificador se utiliza posteriormente en las consultas.
+
+Por ejemplo, una consulta de pacientes conceptualmente funciona de la siguiente manera:
 
 ```ts
 const { data: patients } = await supabase
@@ -157,28 +189,32 @@ const { data: patients } = await supabase
   .eq("user_id", user.id);
 ```
 
-Esto significa que la consulta no solicita simplemente “todos los pacientes”, sino **los pacientes pertenecientes al usuario autenticado**.
+La aplicación no solicita todos los pacientes almacenados en la base.
 
-La misma estrategia se aplica a médicos y turnos.
+Solicita únicamente aquellos cuyo `user_id` coincide con la cuenta autenticada.
 
-Además, la base de datos utiliza **Row Level Security (RLS)** como una segunda capa de protección. De esta manera, la separación de información no depende únicamente de lo que muestra la interfaz.
+La misma lógica se utiliza para médicos y turnos.
 
-Esta característica fue especialmente importante durante el desarrollo porque permitió convertir una primera versión funcional de la agenda en una aplicación preparada para ser utilizada por múltiples cuentas independientes.
+Además del filtrado realizado desde la aplicación, Supabase permite incorporar políticas de **Row Level Security (RLS)** sobre PostgreSQL, agregando una capa de seguridad directamente sobre el acceso a los datos.
 
 ---
 
 # 🗄️ Modelo de datos
 
-El modelo se organiza alrededor de tres entidades principales: `patients`, `doctors` y `appointments`.
+El modelo de Turnify gira alrededor de tres entidades principales:
+
+**Pacientes, Médicos y Turnos.**
+
+Los turnos relacionan a un paciente con un profesional en una fecha y horario determinados.
 
 ```mermaid
 erDiagram
 
-    USER ||--o{ PATIENT : posee
-    USER ||--o{ DOCTOR : posee
-    USER ||--o{ APPOINTMENT : posee
+    USER ||--o{ PATIENT : administra
+    USER ||--o{ DOCTOR : administra
+    USER ||--o{ APPOINTMENT : administra
 
-    PATIENT ||--o{ APPOINTMENT : reserva
+    PATIENT ||--o{ APPOINTMENT : posee
     DOCTOR ||--o{ APPOINTMENT : atiende
 
     USER {
@@ -214,151 +250,248 @@ erDiagram
     }
 ```
 
-El turno funciona como punto de unión entre un paciente y un médico. A su vez, las tres entidades poseen una referencia al usuario propietario de la información.
+El campo `user_id` permite determinar a qué cuenta pertenece cada registro.
 
-Este diseño permite utilizar una única base PostgreSQL sin mezclar la información administrada por diferentes cuentas.
+`patient_id` y `doctor_id`, por otro lado, permiten establecer quién será atendido y qué profesional realizará la atención.
+
+Esta estructura permite mantener una única base de datos sin perder la separación lógica entre los diferentes espacios de trabajo.
 
 ---
 
-# 🖥️ Experiencia de uso
+# 📊 Dashboard
 
-## Dashboard
+El dashboard funciona como punto de entrada al sistema una vez iniciada la sesión.
 
-El dashboard fue diseñado para funcionar como una vista operativa del consultorio.
+Su objetivo no es simplemente mostrar estadísticas, sino permitir que el usuario comprenda rápidamente qué está ocurriendo con su agenda.
 
-En lugar de obligar al usuario a recorrer toda la agenda, al ingresar puede visualizar rápidamente los turnos del día, cuántos fueron confirmados, realizados o cancelados y cuáles son las próximas citas.
+Desde allí puede visualizar la actividad del día, los turnos confirmados, realizados y cancelados, además de acceder a las próximas citas.
 
-También se presentan estadísticas semanales para ofrecer una perspectiva general de la actividad.
-
-<p align="center">
-  <img src="./docs/dashboard.png" width="900" alt="Dashboard de Turnify">
-</p>
-
-## Gestión de pacientes y médicos
-
-Pacientes y profesionales se registran independientemente de los turnos para que su información pueda reutilizarse.
-
-Cuando un paciente vuelve a solicitar una cita no es necesario ingresar nuevamente sus datos. El formulario de turnos incorpora una búsqueda por nombre, correo electrónico o DNI y permite seleccionar directamente el registro existente.
-
-Los médicos poseen además información de especialidad, matrícula y estado, permitiendo determinar qué profesionales están disponibles dentro de la cuenta.
+También se presenta información semanal para ofrecer una perspectiva más amplia de la actividad del consultorio.
 
 <p align="center">
-  <img src="./docs/patients.png" width="900" alt="Pacientes de Turnify">
-</p>
-
-## Agenda y calendario
-
-Los turnos pueden consultarse desde una vista detallada o desde un calendario mensual.
-
-El calendario agrupa visualmente las citas según su fecha y estado. Al seleccionar un día, Turnify permite acceder directamente a los turnos correspondientes a esa fecha.
-
-Esto ofrece dos perspectivas sobre la misma información: una orientada al detalle de cada cita y otra orientada a la planificación temporal.
-
-<p align="center">
-  <img src="./docs/calendar.png" width="900" alt="Calendario de Turnify">
+    <img src="./docs/dashboard.png" alt="Dashboard de Turnify" width="900">
 </p>
 
 ---
 
-# 🤖 ¿Cómo utilicé Inteligencia Artificial?
+# 👨‍⚕️ Gestión de médicos
 
-La Inteligencia Artificial formó parte del proceso de desarrollo como **herramienta de asistencia**, principalmente durante tareas de análisis, debugging, revisión de código y documentación.
+Turnify permite mantener un registro de los profesionales que trabajan dentro del consultorio.
 
-Mi forma de utilizarla no consistió en solicitar la generación completa de Turnify. El proceso habitual fue presentar un problema concreto junto con el código relacionado, analizar las posibles soluciones propuestas, comprender qué cambios implicaban, adaptarlos a la arquitectura del proyecto y finalmente comprobar el resultado mediante pruebas.
+Cada médico posee información como nombre, correo electrónico, matrícula, especialidad y estado.
 
-Un caso concreto fue la transformación de Turnify en un sistema multiusuario.
+Registrar los profesionales independientemente de las citas permite reutilizar su información al programar nuevos turnos y facilita futuras ampliaciones del sistema, como disponibilidad personalizada o agendas individuales.
 
-En una etapa inicial, la autenticación funcionaba pero la aplicación todavía necesitaba garantizar que cada cuenta trabajara exclusivamente con su propia información. Durante esa implementación aparecieron además diferencias entre la sesión disponible en los componentes ejecutados en el navegador y las páginas renderizadas desde el servidor.
+<p align="center">
+    <img src="./docs/doctors.png" alt="Gestión de médicos en Turnify" width="900">
+</p>
 
-Utilicé IA para analizar ese comportamiento, comprender mejor la interacción entre **Next.js, cookies y Supabase Auth** y evaluar distintas formas de estructurar los clientes de Supabase.
+---
 
-A partir de ese análisis implementé dos contextos diferenciados:
+# 🧑‍🤝‍🧑 Gestión de pacientes
+
+Los pacientes también poseen su propio registro dentro del sistema.
+
+Turnify almacena información como nombre, DNI, correo electrónico y teléfono para evitar que estos datos deban ingresarse nuevamente cada vez que una persona solicita una cita.
+
+Durante la creación de un turno, el sistema permite buscar pacientes existentes por diferentes datos y seleccionarlos directamente.
+
+Esto transforma la creación de citas en un proceso más rápido y reduce la duplicación innecesaria de información.
+
+<p align="center">
+    <img src="./docs/patients.png" alt="Gestión de pacientes en Turnify" width="900">
+</p>
+
+---
+
+# 📅 Agenda y calendario
+
+La información de los turnos puede visualizarse de diferentes maneras según la necesidad del usuario.
+
+La agenda permite trabajar con información detallada sobre cada cita, mientras que el calendario ofrece una perspectiva temporal más clara de la actividad mensual.
+
+Desde el calendario es posible identificar rápidamente los días con citas y acceder a la información correspondiente.
+
+<p align="center">
+    <img src="./docs/calendar.png" alt="Calendario de Turnify" width="900">
+</p>
+
+Estas dos vistas trabajan sobre la misma información almacenada en PostgreSQL, pero la presentan de manera diferente según el contexto de uso.
+
+---
+
+# ✨ Creación de turnos
+
+La creación de turnos conecta las principales funcionalidades del sistema.
+
+En lugar de escribir nuevamente los datos del paciente, el usuario puede buscar uno previamente registrado.
+
+Posteriormente selecciona un médico, fecha y horario.
+
+Antes de completar la operación, Turnify consulta las citas existentes para determinar si ese profesional ya posee una reserva en ese momento.
+
+Si existe una superposición, el turno no se registra y se informa al usuario.
+
+Si el horario se encuentra disponible, la cita se guarda y aparece automáticamente en las diferentes vistas del sistema.
+
+<p align="center">
+    <img src="./docs/new-appointment.png" alt="Creación de turno en Turnify" width="900">
+</p>
+
+---
+
+# 🤖 Uso de Inteligencia Artificial durante el desarrollo
+
+La Inteligencia Artificial fue utilizada como una **herramienta de asistencia durante el proceso de desarrollo**, especialmente para debugging, análisis de errores, revisión de código, discusión de alternativas técnicas y documentación.
+
+No se utilizó como un mecanismo para generar el proyecto completo de forma automática.
+
+La metodología consistió en trabajar sobre problemas concretos: identificar el comportamiento incorrecto, proporcionar el código involucrado, analizar las posibles causas y soluciones propuestas por la IA y posteriormente adaptar esas soluciones al proyecto.
+
+Cada modificación era finalmente probada sobre Turnify antes de considerarse resuelto el problema.
+
+## Un caso concreto: convertir Turnify en multiusuario
+
+Uno de los problemas más importantes apareció cuando la aplicación comenzó a incorporar múltiples cuentas.
+
+La autenticación funcionaba, pero no era suficiente simplemente con saber que una persona había iniciado sesión. También era necesario garantizar que todas las consultas utilizaran correctamente esa identidad.
+
+Durante esta etapa utilicé IA para analizar el funcionamiento de las sesiones de Supabase dentro de Next.js y comprender las diferencias entre operaciones realizadas desde **Client Components** y **Server Components**.
+
+El análisis permitió detectar la necesidad de separar la creación de los clientes de Supabase:
 
 ```text
-supabaseBrowser.ts
+Browser Supabase Client
         │
-        └── Operaciones ejecutadas desde el navegador
+        └── Componentes ejecutados en el navegador
 
-supabaseServer.ts
+
+Server Supabase Client
         │
-        └── Operaciones ejecutadas desde Server Components
+        └── Componentes ejecutados en el servidor
+            └── Recuperación de sesión mediante cookies
 ```
 
-También incorporé `user_id` en las consultas e inserciones de las entidades correspondientes.
+Posteriormente incorporé el `user_id` en las operaciones relacionadas con pacientes, médicos y turnos.
 
-La solución no se consideró terminada únicamente porque el código compilara. Para validarla creé y utilicé diferentes cuentas y comprobé que cada una pudiera visualizar sus propios médicos, pacientes y turnos sin acceder a los pertenecientes a otra cuenta.
+La implementación fue validada utilizando cuentas diferentes. Se comprobó que cada una pudiera crear sus propios registros y que, al cambiar de usuario, no fuera posible visualizar la información perteneciente a la otra cuenta.
 
-La IA también fue utilizada para analizar errores durante el despliegue en Vercel, revisar consultas a Supabase, detectar problemas en formularios y discutir determinadas decisiones funcionales.
+## Otros usos de IA
 
-En todos los casos la herramienta fue utilizada para **acelerar el análisis y explorar soluciones**, mientras que la integración, adaptación al proyecto y validación del comportamiento se realizaron sobre la aplicación funcionando.
+También utilicé IA como apoyo para analizar errores de TypeScript y Next.js, revisar consultas realizadas a Supabase, resolver problemas de autenticación durante el despliegue en Vercel y evaluar determinadas decisiones de interfaz y lógica de negocio.
 
----
+Además, fue utilizada como asistencia para estructurar y revisar esta documentación.
 
-# 🧩 Decisiones y desafíos técnicos
-
-El desarrollo no consistió únicamente en implementar pantallas CRUD. Varias funcionalidades obligaron a revisar decisiones iniciales a medida que el proyecto evolucionaba.
-
-La **separación multiusuario** fue uno de esos casos. Incorporarla requirió modificar el modelo de datos y las consultas existentes para introducir `user_id`, además de verificar la sesión desde diferentes contextos de Next.js.
-
-Otro desafío fue la **persistencia de la autenticación** entre Client y Server Components. La utilización de clientes de Supabase específicos para cada entorno permitió mantener una arquitectura compatible con el renderizado del servidor.
-
-La **validación de disponibilidad** también forma parte de la lógica de negocio. Antes de insertar un turno se comprueba la combinación médico-fecha-horario, evitando reservas simultáneas para un mismo profesional.
-
-Finalmente, el despliegue en **Vercel** requirió separar correctamente la configuración sensible del código mediante variables de entorno y conectar la aplicación publicada con el proyecto de Supabase.
-
-Estos problemas fueron especialmente útiles durante el desarrollo porque obligaron a ir más allá de la interfaz y trabajar sobre autenticación, persistencia, seguridad y comportamiento en producción.
+En todos los casos, la IA funcionó como una herramienta para **acelerar el análisis y explorar soluciones**, mientras que las decisiones finales, integración del código y pruebas se realizaron sobre el proyecto.
 
 ---
 
-# ⚙️ Stack tecnológico
+# 🧩 Desafíos y decisiones técnicas
 
-Turnify utiliza **Next.js 16 con React y TypeScript** como base de la aplicación. Next.js permitió organizar el sistema mediante App Router y combinar componentes ejecutados en cliente y servidor.
+Durante el desarrollo aparecieron situaciones que obligaron a modificar la arquitectura inicial del proyecto.
 
-**Supabase** proporciona autenticación y acceso a una base de datos **PostgreSQL**, reduciendo la necesidad de implementar un backend de autenticación independiente y permitiendo incorporar políticas RLS directamente sobre los datos.
+Una de las más importantes fue la incorporación del modelo multiusuario.
 
-La interfaz está construida con **Tailwind CSS**, mientras que **FullCalendar** se utiliza para representar la agenda mensual y **Lucide React** para la iconografía.
+No alcanzaba con agregar un sistema de login. También fue necesario modificar las entidades y consultas para asociar correctamente los registros con la cuenta propietaria.
 
-La aplicación se encuentra desplegada mediante **Vercel**, conectado al repositorio de GitHub para actualizar producción a partir de los cambios publicados en la rama principal.
+Otro desafío estuvo relacionado con la autenticación entre cliente y servidor. Durante las pruebas, una sesión podía existir correctamente en el navegador pero no estar disponible de la misma forma dentro de un Server Component.
+
+Esto llevó a separar los clientes de Supabase y utilizar cookies para recuperar la sesión desde el servidor.
+
+La validación de disponibilidad de los médicos fue otra decisión de negocio importante. Turnify consulta los turnos existentes antes de registrar una nueva cita para evitar que un profesional pueda recibir dos reservas simultáneas.
+
+Finalmente, el despliegue en Vercel requirió configurar correctamente las variables de entorno utilizadas para conectar la aplicación publicada con Supabase.
+
+Estos desafíos hicieron que el desarrollo involucrara no solamente la creación de una interfaz, sino también decisiones relacionadas con arquitectura, autenticación, seguridad y persistencia de datos.
 
 ---
 
-# 📂 Organización
+# 🛠️ Tecnologías utilizadas
+
+### Next.js + React
+
+Constituyen la base de la aplicación y permiten combinar interfaces interactivas con renderizado del lado del servidor.
+
+### TypeScript
+
+Permite incorporar tipado estático y detectar determinados errores durante el desarrollo y proceso de build.
+
+### Supabase
+
+Se utiliza para autenticación, manejo de sesiones y comunicación con la base de datos.
+
+### PostgreSQL
+
+Almacena pacientes, médicos y turnos, además de las relaciones necesarias para mantener los espacios de trabajo independientes.
+
+### Tailwind CSS
+
+Se utiliza para construir y mantener la interfaz visual de Turnify.
+
+### FullCalendar
+
+Permite representar los turnos mediante una vista de calendario.
+
+### Lucide React
+
+Proporciona los iconos utilizados en la interfaz.
+
+### Vercel
+
+Turnify se encuentra desplegado en Vercel y conectado con el repositorio del proyecto.
+
+---
+
+# 📂 Estructura del proyecto
 
 ```text
-src/
+turnify/
 │
-├── app/
-│   ├── appointments/
-│   ├── calendar/
-│   ├── dashboard/
-│   ├── doctors/
-│   ├── patients/
-│   ├── login/
-│   └── register/
+├── src/
+│   │
+│   ├── app/
+│   │   ├── appointments/
+│   │   ├── calendar/
+│   │   ├── dashboard/
+│   │   ├── doctors/
+│   │   ├── patients/
+│   │   ├── login/
+│   │   └── register/
+│   │
+│   ├── components/
+│   │   ├── calendar/
+│   │   ├── AppLayout.tsx
+│   │   ├── AuthGuard.tsx
+│   │   └── ...
+│   │
+│   └── lib/
+│       ├── supabaseBrowser.ts
+│       └── supabaseServer.ts
 │
-├── components/
-│   ├── calendar/
-│   ├── AppLayout.tsx
-│   ├── AuthGuard.tsx
-│   └── ...
+├── docs/
 │
-└── lib/
-    ├── supabaseBrowser.ts
-    └── supabaseServer.ts
+├── public/
+│
+└── README.md
 ```
 
-Las rutas funcionales se encuentran dentro de `app`, mientras que los componentes reutilizables están separados en `components`.
+La carpeta `app` contiene las rutas principales del sistema.
 
-La configuración de acceso a Supabase se mantiene dentro de `lib`, distinguiendo explícitamente las operaciones realizadas desde navegador y servidor.
+Los elementos reutilizables de interfaz y comportamiento se encuentran dentro de `components`, mientras que `lib` contiene la configuración necesaria para comunicarse con Supabase.
 
 ---
 
-# 🚀 Ejecutar Turnify localmente
+# 🚀 Ejecutar el proyecto localmente
 
-Clonar el repositorio:
+Primero se debe clonar el repositorio:
 
 ```bash
 git clone https://github.com/RocioAranibar/turnify.git
+```
+
+Ingresar al proyecto:
+
+```bash
 cd turnify
 ```
 
@@ -368,36 +501,48 @@ Instalar las dependencias:
 npm install
 ```
 
-Crear un archivo `.env.local`:
+Crear un archivo `.env.local` en la raíz:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=TU_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=TU_SUPABASE_PUBLISHABLE_KEY
 ```
 
-Finalmente:
+Finalmente ejecutar:
 
 ```bash
 npm run dev
 ```
 
-La aplicación estará disponible por defecto en:
+La aplicación estará disponible normalmente en:
 
 ```text
 http://localhost:3000
 ```
 
-Las credenciales reales de Supabase no forman parte del repositorio y deben configurarse mediante variables de entorno.
+Las credenciales reales utilizadas por el proyecto no se incluyen en el repositorio y deben configurarse mediante variables de entorno.
 
 ---
 
-# 🔮 Evolución del proyecto
+# 🌐 Deploy
 
-Turnify actualmente cubre el flujo central necesario para administrar una agenda: autenticación, médicos, pacientes, creación y seguimiento de turnos, calendario y estadísticas.
+Turnify se encuentra desplegado en Vercel:
 
-Una evolución natural sería permitir que una misma organización tenga diferentes usuarios internos con roles como administrador, recepcionista y médico. Sobre esa base también podrían incorporarse disponibilidad configurable por profesional, recordatorios automáticos, obras sociales, reportes e historial de atención.
+### 🚀 https://turnify-five.vercel.app
 
-La arquitectura multiusuario actual deja preparado el proyecto para continuar avanzando en esa dirección.
+El proyecto está conectado con el repositorio de GitHub, permitiendo mantener actualizada la versión publicada a medida que evoluciona la aplicación.
+
+---
+
+# 🔮 Próximos pasos
+
+Turnify actualmente cubre el flujo central de administración de una agenda médica: autenticación, pacientes, profesionales, turnos, estados, calendario y estadísticas.
+
+La arquitectura actual permite continuar evolucionando el proyecto.
+
+Entre las posibles extensiones se encuentran la incorporación de roles internos para administradores, recepcionistas y médicos; configuración de días y horarios de atención por profesional; recordatorios automáticos; obras sociales; historial de pacientes; reportes y notificaciones.
+
+El objetivo sería evolucionar Turnify desde un sistema de gestión de turnos hacia una plataforma más completa para la administración cotidiana de consultorios.
 
 ---
 
@@ -405,8 +550,10 @@ La arquitectura multiusuario actual deja preparado el proyecto para continuar av
 
 **Rocío Aranibar**
 
-Proyecto desarrollado como challenge técnico, abarcando diseño de interfaz, lógica de negocio, autenticación, modelado de datos, integración con Supabase y despliegue.
+Turnify fue desarrollado como challenge técnico, abarcando diseño de interfaz, lógica de negocio, autenticación, modelado de datos, integración con Supabase, seguridad multiusuario y despliegue.
 
-**Demo:** https://turnify-five.vercel.app  
-**Repositorio:** https://github.com/RocioAranibar/turnify
+### 🔗 Demo
+https://turnify-five.vercel.app
 
+### 🔗 Repositorio
+https://github.com/RocioAranibar/turnify
