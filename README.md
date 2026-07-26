@@ -283,7 +283,7 @@ Cada médico posee información como nombre, correo electrónico, matrícula, es
 Registrar los profesionales independientemente de las citas permite reutilizar su información al programar nuevos turnos y facilita futuras ampliaciones del sistema, como disponibilidad personalizada o agendas individuales.
 
 <p align="center">
-    <img src="./docs/doctors.png" alt="Gestión de médicos en Turnify" width="900">
+    <img src="./docs/medicos.png" alt="Gestión de médicos en Turnify" width="900">
 </p>
 
 ---
@@ -299,7 +299,7 @@ Durante la creación de un turno, el sistema permite buscar pacientes existentes
 Esto transforma la creación de citas en un proceso más rápido y reduce la duplicación innecesaria de información.
 
 <p align="center">
-    <img src="./docs/patients.png" alt="Gestión de pacientes en Turnify" width="900">
+    <img src="./docs/pacientes.png" alt="Gestión de pacientes en Turnify" width="900">
 </p>
 
 ---
@@ -313,7 +313,7 @@ La agenda permite trabajar con información detallada sobre cada cita, mientras 
 Desde el calendario es posible identificar rápidamente los días con citas y acceder a la información correspondiente.
 
 <p align="center">
-    <img src="./docs/calendar.png" alt="Calendario de Turnify" width="900">
+    <img src="./docs/calendario.png" alt="Calendario de Turnify" width="900">
 </p>
 
 Estas dos vistas trabajan sobre la misma información almacenada en PostgreSQL, pero la presentan de manera diferente según el contexto de uso.
@@ -335,7 +335,7 @@ Si existe una superposición, el turno no se registra y se informa al usuario.
 Si el horario se encuentra disponible, la cita se guarda y aparece automáticamente en las diferentes vistas del sistema.
 
 <p align="center">
-    <img src="./docs/new-appointment.png" alt="Creación de turno en Turnify" width="900">
+    <img src="./docs/turnos.png" alt="Creación de turno en Turnify" width="900">
 </p>
 
 ---
