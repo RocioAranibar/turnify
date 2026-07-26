@@ -315,6 +315,7 @@ La agenda permite trabajar con información detallada sobre cada cita, mientras 
 </p>
 Desde el calendario es posible identificar rápidamente los días con citas y acceder a la información correspondiente.
 
+
 <p align="center">
     <img src="./docs/calendario.png" alt="Calendario de Turnify" width="900">
 </p>
